@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Sci-Fi Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 🔵 LOADING SCREEN -->
+<div id="loading">
+  <div class="loader-core"></div>
+  <div class="loading-text">INITIALIZING SYSTEM</div>
+</div>
+
+<!-- 🟢 MAIN MENU -->
+<div class="bg hidden" id="main">
+  <div class="overlay"></div>
+
+  <div class="menu-box">
+    <h1 class="title">GAME PORTAL</h1>
+
+    <a href="game-cara-1-3.html" class="menu-item">
+      <span class="icon">◆</span>
+      <span class="text">GAME CARA MENGGUNAKAN KOMPUTER KELAS 1–3</span>
+    </a>
+
+    <a href="game-cara-4-6.html" class="menu-item">
+      <span class="icon">◆</span>
+      <span class="text">GAME CARA MENGGUNAKAN KOMPUTER KELAS 4–6</span>
+    </a>
+
+    <a href="pokemon.html" class="menu-item">
+      <span class="icon">◆</span>
+      <span class="text">POKEMON TYPING GAME</span>
+    </a>
+
+    <a href="tv-online.html" class="menu-item">
+      <span class="icon">◆</span>
+      <span class="text">TV ONLINE</span>
+    </a>
+  </div>
+</div>
+
+<!-- 🔊 SOUND -->
+<audio id="hoverSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3"></audio>
+<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
+
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Typing Master</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pokedex-red: #DC0A2D;
+            --pokedex-dark: #89061C;
+            --screen-bg: #E0F8CF;
+            --ui-blue: #3B4CCA;
+            --ui-yellow: #FFCB05;
+            --ui-green: #4CAF50;
+            --text-color: #333;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #2c3e50;
+            background-image: radial-gradient(#34495e 15%, transparent 16%), radial-gradient(#34495e 15%, transparent 16%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* CONTAINER UTAMA */
+        #game-container {
+            width: 95%;
+            max-width: 900px;
+            background-color: var(--pokedex-red);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 0 0 12px var(--pokedex-dark), 0 25px 80px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 4px solid var(--ui-blue);
+            z-index: 10;
+        }
+
+        /* --- MENU INTRO --- */
+        #intro-screen {
+            background: white;
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            border-radius: 25px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; padding: 20px; text-align: center;
+            background: linear-gradient(to bottom, #f0f0f0, #fff);
+        }
+
+        .intro-img-container {
+            position: relative; width: 250px; height: 250px; margin-bottom: 20px;
+        }
+
+        .intro-pikachu {
+            width: 200px; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            z-index: 2; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        .pokeball-bg {
+            width: 220px; height: 220px;
+            background: linear-gradient(to bottom, #ff0000 50%, #ffffff 50%);
+            border-radius: 50%; border: 8px solid #333;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 1; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2);
+        }
+        .pokeball-bg::before {
+            content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 8px; background: #333; transform: translateY(-50%);
+        }
+        .pokeball-bg::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; background: white; border: 8px solid #333; border-radius: 50%; transform: translate(-50%, -50%);
+        }
+
+        .intro-title {
+            font-family: 'Fredoka One', cursive; font-size: 3rem; color: var(--ui-blue);
+            text-shadow: 3px 3px 0 var(--ui-yellow); margin: 0 0 20px 0; letter-spacing: 2px;
+        }
+
+        .input-name-box { position: relative; margin-bottom: 20px; width: 80%; }
+        .input-name-box input {
+            width: 100%; padding: 15px; font-size: 1.2rem; border: 4px solid var(--ui-blue);
+            border-radius: 50px; text-align: center; font-family: 'Nunito', sans-serif; font-weight: bold; outline: none;
+        }
+        .input-name-box input:focus { box-shadow: 0 0 15px var(--ui-blue); }
+
+        .menu-btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            background-color: var(--ui-blue); color: white; border: none; padding: 15px 40px;
+            font-size: 1.5rem; font-family: 'Fredoka One', cursive; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 8px 0 #1a237e; transition: transform 0.1s, box-shadow 0.1s; min-width: 160px;
+        }
+        .btn:active { transform: translateY(8px); box-shadow: 0 0 0 #1a237e; }
+        .btn-yellow { background-color: var(--ui-yellow); color: var(--ui-blue); box-shadow: 0 8px 0 #bfa004; }
+        .btn-yellow:active { box-shadow: 0 0 0 #bfa004; }
+        .btn-green { background-color: var(--ui-green); color: white; box-shadow: 0 8px 0 #2E7D32; }
+        .btn-green:active { box-shadow: 0 0 0 #2E7D32; }
+
+        /* --- SCREEN GAMEPLAY --- */
+        .screen-container {
+            background-color: var(--screen-bg);
+            border: 15px solid #dedede; border-radius: 20px;
+            width: 100%; height: 500px;
+            padding: 20px; position: relative;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        .quit-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: var(--pokedex-red);
+            color: white;
+            border: 3px solid white;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 50;
+            box-shadow: 0 4px 0 var(--pokedex-dark);
+            transition: transform 0.2s;
+        }
+        .quit-btn:hover {
+            transform: scale(1.05);
+            background: #ff3333;
+        }
+        .quit-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 var(--pokedex-dark);
+        }
+
+        .hud-top {
+            display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 10px;
+        }
+        
+        .hud-mascot {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(255,255,255,0.6); padding: 5px 10px; border-radius: 15px;
+            border: 2px solid var(--ui-yellow); animation: floatMascot 3s infinite ease-in-out;
+        }
+        .hud-mascot img { width: 30px; height: 30px; image-rendering: pixelated; }
+        .hud-mascot span { font-size: 0.6rem; font-weight: bold; color: var(--ui-blue); text-align: center; margin-top: 2px;}
+
+        .stats-box { display: flex; gap: 10px; }
+        .hud-item {
+            background: white; padding: 5px 15px; border-radius: 30px; border: 3px solid var(--ui-blue);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1); font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--ui-blue);
+        }
+
+        .level-badge {
+            background: var(--pokedex-red); color: white; padding: 5px 15px; border-radius: 20px;
+            font-size: 0.9rem; margin-bottom: 10px; font-family: 'Fredoka One', cursive; text-transform: uppercase;
+            border: 2px solid white; box-shadow: 0 4px 0 var(--pokedex-dark); align-self: center;
+        }
+
+        .game-visuals { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+
+        .pokemon-img { max-height: 150px; width: auto; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); transition: transform 0.2s; }
+        .pokemon-img.pop { transform: scale(1.3); }
+
+        .word-display {
+            font-family: 'Fredoka One', cursive; font-size: 3rem; letter-spacing: 3px;
+            margin: 20px 0; text-align: center; color: #333;
+        }
+        
+        .progress-info { font-size: 1.2rem; font-weight: bold; color: #555; margin-bottom: 10px; }
+        .progress-dots { display: flex; gap: 5px; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; background: #ccc; transition: 0.3s; }
+        .dot.active { background: var(--ui-blue); transform: scale(1.3); }
+        .dot.done { background: var(--ui-green); }
+
+        /* --- OVERLAYS --- */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92); z-index: 50;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center; border-radius: 5px; padding: 20px;
+        }
+        .hidden { display: none !important; }
+
+        h2 { font-family: 'Fredoka One', cursive; font-size: 2.5rem; margin-bottom: 30px; color: var(--ui-yellow); text-shadow: 2px 2px 0 #333; }
+
+        #hidden-input { position: absolute; opacity: 0; top: -1000px; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } 100% { transform: translateX(0); } }
+        @keyframes floatMascot { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        
+        .shake { animation: shake 0.3s; }
+        .char-correct { color: var(--ui-green); }
+        .char-current { border-bottom: 5px solid var(--ui-yellow); }
+        .char-wrong { color: var(--pokedex-red); text-decoration: underline; background: rgba(255,0,0,0.1); border-radius: 4px; }
+
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        th { background: var(--ui-blue); color: white; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="screen-container">
+        <div class="hud-top">
+            <div class="stats-box">
+                <div class="hud-item">⏳ <span id="time-display">180</span>s</div>
+                <div class="hud-item">⭐ <span id="score-display">0</span></div>
+            </div>
+            <div class="hud-mascot">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Pika">
+                <span>Latih Skill<br>Mengetikmu!</span>
+            </div>
+        </div>
+
+        <div id="level-stage-badge" class="level-badge">Level 1 - Stage 1</div>
+
+        <div class="game-visuals">
+            <img id="pokemon-img" class="pokemon-img" src="" alt="Pokemon" style="display:none;">
+            <div id="word-display" class="word-display">READY</div>
+            <div class="progress-info">Soal: <span id="word-count">0</span>/10</div>
+            <div class="progress-dots" id="progress-dots"></div>
+        </div>
+
+        <button class="quit-btn" onclick="quitGame()">🚪 MAIN MENU</button>
+        <input type="text" id="hidden-input" autocomplete="off">
+    </div>
+
+    <div id="evolution-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:300; opacity:0; pointer-events:none; display:flex; align-items:center; justify-content:center;">
+        <div id="evo-text" style="font-family:'Fredoka One'; font-size:3rem; color:var(--ui-blue); transform:scale(0); transition:0.5s;">EVOLVING...</div>
+    </div>
+
+    <div id="intro-screen">
+        <div class="intro-img-container">
+            <div class="pokeball-bg"></div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" class="intro-pikachu" alt="Pikachu">
+        </div>
+        <h1 class="intro-title">POKÉMON TYPE</h1>
+        <div class="input-name-box">
+            <input type="text" id="player-name-input" placeholder="Isi Nama Kamu..." maxlength="12">
+        </div>
+        <div class="menu-btn-group">
+            <button class="btn btn-yellow" onclick="submitName()">START</button>
+            <button class="btn btn-green" onclick="showLeaderboardFromIntro()">LEADERBOARD</button>
+            <button class="btn" style="background:#555; box-shadow:0 8px 0 #333;" onclick="location.href='index.html'">KEMBALI</button>
+        </div>
+    </div>
+
+    <div id="level-select-overlay" class="overlay hidden">
+        <h2>PILIH LEVEL</h2>
+        <div class="level-grid" id="level-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:15px; width:100%; max-width:500px;"></div>
+        <button class="btn" style="background:#555; box-shadow:0 4px 0 #333; margin-top:20px;" onclick="backToIntro()">BACK</button>
+    </div>
+
+    <div id="result-overlay" class="overlay hidden">
+        <h2 id="result-title">STAGE CLEAR!</h2>
+        <div class="result-score" id="result-score" style="font-size:4rem;">0</div>
+        <div class="menu-btn-group">
+            <button class="btn btn-yellow" id="btn-next-stage" onclick="nextStageAction()">NEXT ➡</button>
+            <button class="btn" onclick="retryStageAction()">RETRY 🔄</button>
+        </div>
+    </div>
+
+    <div id="level-complete-overlay" class="overlay hidden">
+        <h2 style="color:var(--ui-green)">LEVEL COMPLETE!</h2>
+        <div class="result-score" id="final-level-score" style="font-size:3rem;">0</div>
+        <div class="menu-btn-group" style="flex-direction:column; gap:15px;">
+            <button class="btn btn-yellow" onclick="goToNextLevel()">NEXT LEVEL ⬆️</button>
+            <button class="btn" onclick="backToMenuFromResult()">MAIN MENU 🏠</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-overlay" class="overlay hidden">
+        <h2>🏆 LEADERBOARD 🏆</h2>
+        <div style="width:100%; max-height:250px; overflow-y:auto; margin-bottom:15px;">
+            <table>
+                <thead><tr><th>Rank</th><th>Nama</th><th>Level</th><th>Skor</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+        <button class="btn" onclick="backToIntro()">KEMBALI</button>
+    </div>
+</div>
+
+<script>
+    const allPokemon = [
+        {id:25, name:"Pikachu"}, {id:133, name:"Eevee"}, {id:39, name:"Jigglypuff"}, {id:52, name:"Meowth"}, 
+        {id:4, name:"Charmander"}, {id:7, name:"Squirtle"}, {id:1, name:"Bulbasaur"}, {id:35, name:"Clefairy"}, 
+        {id:54, name:"Psyduck"}, {id:58, name:"Growlithe"}, {id:63, name:"Abra"}, {id:66, name:"Machop"}
+    ];
+
+    const CONFIG = { maxLevels: 10, stagesPerLevel: 3, wordsPerStage: 10, timeLimit: 180 };
+
+    let state = {
+        playerName: "", currentLevel: 1, currentStage: 1, unlockedLevel: 1,
+        score: 0, timeRemaining: 180, wordIndex: 0, currentWordObj: null,
+        typedIndex: 0, isPlaying: false, timerInterval: null, stageWords: []
+    };
+
+    const els = {
+        introScreen: document.getElementById('intro-screen'),
+        levelSelect: document.getElementById('level-select-overlay'),
+        resultOverlay: document.getElementById('result-overlay'),
+        levelCompleteOverlay: document.getElementById('level-complete-overlay'),
+        leaderboardOverlay: document.getElementById('leaderboard-overlay'),
+        evolutionOverlay: document.getElementById('evolution-overlay'),
+        evoText: document.getElementById('evo-text'),
+        nameInput: document.getElementById('player-name-input'),
+        levelGrid: document.getElementById('level-grid'),
+        levelBadge: document.getElementById('level-stage-badge'),
+        timeDisplay: document.getElementById('time-display'),
+        scoreDisplay: document.getElementById('score-display'),
+        wordDisplay: document.getElementById('word-display'),
+        wordCountDisplay: document.getElementById('word-count'),
+        progressDots: document.getElementById('progress-dots'),
+        hiddenInput: document.getElementById('hidden-input'),
+        pokemonImg: document.getElementById('pokemon-img'),
+        resultTitle: document.getElementById('result-title'),
+        resultScore: document.getElementById('result-score'),
+        finalLevelScore: document.getElementById('final-level-score'),
+        leaderboardBody: document.getElementById('leaderboard-body'),
+        gameContainer: document.getElementById('game-container')
+    };
+
+    function init() {
+        const savedName = localStorage.getItem('pkmnPlayerName');
+        if (savedName) { state.playerName = savedName; els.nameInput.value = savedName; }
+        const savedLevel = localStorage.getItem('pkmnUnlockedLevel');
+        if (savedLevel) state.unlockedLevel = parseInt(savedLevel);
+        updateLeaderboardUI();
+    }
+
+    function submitName() {
+        const name = els.nameInput.value.trim();
+        if (!name) { alert("Isi nama dulu ya!"); return; }
+        state.playerName = name.toUpperCase();
+        localStorage.setItem('pkmnPlayerName', state.playerName);
+        els.introScreen.classList.add('hidden');
+        showLevelSelect();
+    }
+
+    function backToIntro() {
+        els.levelSelect.classList.add('hidden');
+        els.leaderboardOverlay.classList.add('hidden');
+        els.introScreen.classList.remove('hidden');
+    }
+
+    function showLevelSelect() {
+        els.levelSelect.classList.remove('hidden');
+        els.levelGrid.innerHTML = '';
+        for (let i = 1; i <= CONFIG.maxLevels; i++) {
+            const btn = document.createElement('button');
+            const isUnlocked = i <= state.unlockedLevel;
+            btn.style.cssText = "padding:15px; border-radius:10px; border:none; font-family:'Fredoka One'; cursor:" + (isUnlocked ? "pointer" : "not-allowed");
+            btn.style.background = isUnlocked ? "white" : "#444";
+            btn.innerHTML = isUnlocked ? i : "🔒";
+            if (isUnlocked) btn.onclick = () => startLevel(i);
+            els.levelGrid.appendChild(btn);
+        }
+    }
+
+    function startLevel(levelIndex) {
+        state.currentLevel = levelIndex;
+        state.currentStage = 1;
+        state.score = 0; // Reset hanya saat mulai level baru
+        startStage();
+    }
+
+    function startStage() {
+        state.timeRemaining = CONFIG.timeLimit;
+        state.wordIndex = 0;
+        state.isPlaying = true;
+        state.typedIndex = 0;
+        state.stageWords = [...allPokemon].sort(() => 0.5 - Math.random()).slice(0, CONFIG.wordsPerStage);
+        
+        els.levelSelect.classList.add('hidden');
+        els.resultOverlay.classList.add('hidden');
+        els.levelCompleteOverlay.classList.add('hidden');
+        els.levelBadge.innerText = `Level ${state.currentLevel} - Stage ${state.currentStage}`;
+        
+        els.progressDots.innerHTML = '';
+        for(let i=0; i<CONFIG.wordsPerStage; i++) {
+            const dot = document.createElement('div');
+            dot.style.cssText = "width:15px; height:15px; border-radius:50%; background:#ccc;";
+            els.progressDots.appendChild(dot);
+        }
+
+        updateHUD();
+        loadWord();
+        clearInterval(state.timerInterval);
+        state.timerInterval = setInterval(gameLoop, 1000);
+        els.hiddenInput.focus();
+    }
+
+    function loadWord() {
+        if (state.wordIndex >= CONFIG.wordsPerStage) { winStage(); return; }
+        state.currentWordObj = state.stageWords[state.wordIndex];
+        state.typedIndex = 0;
+        els.pokemonImg.style.display = 'block';
+        els.pokemonImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.currentWordObj.id}.png`;
+        renderWord();
+    }
+
+    function renderWord() {
+        const word = state.currentWordObj.name;
+        let html = '';
+        for (let i = 0; i < word.length; i++) {
+            let className = '';
+            if (i < state.typedIndex) className = 'char-correct';
+            else if (i === state.typedIndex) className = 'char-current';
+            html += `<span class="${className}">${word[i]}</span>`;
+        }
+        els.wordDisplay.innerHTML = html;
+    }
+
+    function handleInput(char) {
+        if (!state.isPlaying) return;
+        const target = state.currentWordObj.name[state.typedIndex];
+        
+        if (char.toLowerCase() === target.toLowerCase()) {
+            state.score += 10;
+            state.typedIndex++;
+            renderWord();
+            if (state.typedIndex >= state.currentWordObj.name.length) {
+                state.wordIndex++;
+                updateDots();
+                loadWord();
+            }
+        } else {
+            // Getar HANYA saat salah
+            state.score = Math.max(0, state.score - 5);
+            els.gameContainer.classList.add('shake');
+            setTimeout(() => els.gameContainer.classList.remove('shake'), 300);
+        }
+        updateHUD();
+    }
+
+    function updateDots() {
+        const dots = els.progressDots.children;
+        for (let i = 0; i < dots.length; i++) {
+            dots[i].style.background = (i < state.wordIndex) ? "var(--ui-green)" : "#ccc";
+        }
+    }
+
+    function gameLoop() {
+        state.timeRemaining--;
+        updateHUD();
+        if (state.timeRemaining <= 0) endStage(false);
+    }
+
+    function updateHUD() {
+        els.timeDisplay.innerText = state.timeRemaining;
+        els.scoreDisplay.innerText = state.score;
+        els.wordCountDisplay.innerText = state.wordIndex;
+    }
+
+    function quitGame() {
+        if (confirm("Keluar dan simpan skor terakhir?")) {
+            saveScore(state.score); // Simpan skor saat Quit
+            state.isPlaying = false;
+            clearInterval(state.timerInterval);
+            showLevelSelect();
+        }
+    }
+
+    function winStage() {
+        saveScore(state.score); // Simpan skor setiap stage selesai
+        state.isPlaying = false;
+        clearInterval(state.timerInterval);
+        if (state.currentStage === CONFIG.stagesPerLevel) triggerEvolutionSequence();
+        else {
+            els.resultOverlay.classList.remove('hidden');
+            els.resultScore.innerText = state.score;
+        }
+    }
+
+    function triggerEvolutionSequence() {
+        els.evolutionOverlay.style.opacity = "1";
+        els.evoText.style.transform = "scale(1)";
+        setTimeout(() => {
+            els.evolutionOverlay.style.opacity = "0";
+            els.evoText.style.transform = "scale(0)";
+            if (state.currentLevel === state.unlockedLevel) {
+                state.unlockedLevel++;
+                localStorage.setItem('pkmnUnlockedLevel', state.unlockedLevel);
+            }
+            els.levelCompleteOverlay.classList.remove('hidden');
+            els.finalLevelScore.innerText = state.score;
+        }, 2000);
+    }
+
+    function endStage(isWin) {
+        saveScore(state.score); // Simpan skor saat Waktu Habis
+        state.isPlaying = false;
+        clearInterval(state.timerInterval);
+        els.resultOverlay.classList.remove('hidden');
+        els.resultTitle.innerText = "WAKTU HABIS!";
+        els.resultScore.innerText = state.score;
+    }
+
+    function saveScore(score) {
+        if (score <= 0 || !state.playerName) return;
+        let lbData = localStorage.getItem('pkmnLeaderboard');
+        let lb = lbData ? JSON.parse(lbData) : [];
+        
+        // Simpan setiap percobaan sebagai baris baru
+        lb.push({ 
+            name: state.playerName, 
+            level: state.currentLevel, 
+            score: score, 
+            date: new Date().toLocaleString() 
+        });
+        
+        lb.sort((a,b) => b.score - a.score);
+        localStorage.setItem('pkmnLeaderboard', JSON.stringify(lb.slice(0, 10)));
+        updateLeaderboardUI();
+    }
+
+    function updateLeaderboardUI() {
+        const lbData = localStorage.getItem('pkmnLeaderboard');
+        const lb = lbData ? JSON.parse(lbData) : [];
+        els.leaderboardBody.innerHTML = lb.map((e, i) => `<tr><td>${i+1}</td><td>${e.name}</td><td>${e.level}</td><td>${e.score}</td></tr>`).join('');
+    }
+
+    function showLeaderboardFromIntro() {
+        updateLeaderboardUI();
+        els.introScreen.classList.add('hidden');
+        els.leaderboardOverlay.classList.remove('hidden');
+    }
+
+    function nextStageAction() { state.currentStage++; startStage(); }
+    function retryStageAction() { startStage(); }
+    function goToNextLevel() { state.currentLevel++; startLevel(state.currentLevel); }
+    function backToMenuFromResult() { showLevelSelect(); }
+
+    document.addEventListener('keydown', (e) => { 
+        if(state.isPlaying && e.key.length === 1 && !e.ctrlKey) handleInput(e.key); 
+    });
+    
+    init();
+</script>
+</body>
+</html>
