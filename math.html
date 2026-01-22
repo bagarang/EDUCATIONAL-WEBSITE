@@ -84,14 +84,13 @@
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .modal-box { background: white; border: var(--border); border-radius: 25px; padding: 25px; width: 100%; max-width: 320px; text-align: center; box-shadow: 8px 8px 0px var(--ink-black); }
 
-        /* Styling Tombol di Modal agar Seragam */
         .btn-modal { width: 100%; margin-bottom: 10px; padding: 12px; font-size: 1.1rem; }
 
         .wrong-ans { animation: shake 0.4s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); color: var(--doodle-red); }
-            75% { transform: translateX(8px); }
+            25% { transform: translateX(-10px); color: var(--doodle-red); }
+            75% { transform: translateX(10px); }
         }
     </style>
 </head>
@@ -186,6 +185,7 @@
 
     function newQ() {
         state.input = '';
+        state.isPlaying = true; // Pastikan input aktif kembali
         document.getElementById('answer-view').innerText = '?';
         document.getElementById('answer-view').style.color = 'var(--doodle-blue)';
         
@@ -207,7 +207,10 @@
         state.timerId = setInterval(() => {
             state.timer--;
             updateTUI();
-            if(state.timer <= 0) { clearInterval(state.timerId); feedback(false); }
+            if(state.timer <= 0) { 
+                clearInterval(state.timerId); 
+                feedback(false); 
+            }
         }, 1000);
     }
 
@@ -217,11 +220,23 @@
         f.style.background = state.timer <= 5 ? 'var(--doodle-red)' : 'var(--doodle-green)';
     }
 
-    function pressNum(n) { if(state.input.length < 4) { state.input += n; document.getElementById('answer-view').innerText = state.input; } }
-    function pressClear() { state.input = ''; document.getElementById('answer-view').innerText = '?'; }
+    function pressNum(n) { 
+        if(!state.isPlaying) return; // Pengaman input
+        if(state.input.length < 4) { 
+            state.input += n; 
+            document.getElementById('answer-view').innerText = state.input; 
+        } 
+    }
+    
+    function pressClear() { 
+        if(!state.isPlaying) return; // Pengaman input
+        state.input = ''; 
+        document.getElementById('answer-view').innerText = '?'; 
+    }
 
     function checkAnswer() {
-        if(!state.input) return;
+        if(!state.isPlaying || !state.input) return; // Pengaman agar tidak spam enter
+        state.isPlaying = false; // Kunci input selama feedback berlangsung
         clearInterval(state.timerId);
         feedback(parseInt(state.input) === state.ans);
     }
@@ -237,33 +252,37 @@
             card.classList.add('wrong-ans');
             view.style.color = 'var(--doodle-red)';
             view.innerText = state.ans;
-            setTimeout(() => { card.classList.remove('wrong-ans'); next(); }, 1000);
+            setTimeout(() => { 
+                card.classList.remove('wrong-ans'); 
+                next(); 
+            }, 1000);
         }
         document.getElementById('hud-score').innerText = state.score;
     }
 
     function next() {
         state.level++;
-        if(state.level > 5) { showMod(); }
-        else {
+        if(state.level > 5) { 
+            showMod(); 
+        } else {
             document.getElementById('hud-stage').innerText = `Stage ${state.stage} (${state.level}/5)`;
             newQ();
         }
     }
 
     function showMod() {
+        state.isPlaying = false; // Kunci input keyboard total saat modal muncul
         saveLB();
         document.getElementById('modal-score').innerText = state.score;
         document.getElementById('modal-res').style.display = 'flex';
     }
 
-    // IMPROVISASI: Logika Tombol di Modal
     function handleModalAction(action) {
         document.getElementById('modal-res').style.display = 'none';
         if(action === 'next') {
             state.stage++; state.level = 1;
             document.getElementById('hud-stage').innerText = `Stage ${state.stage}`;
-            newQ();
+            newQ(); // Di dalam newQ isPlaying akan jadi true kembali
         } else if(action === 'retry') {
             state.level = 1;
             newQ();
@@ -292,19 +311,15 @@
 
     function confirmQuit() { if(confirm("Keluar game?")) location.reload(); }
 
-    // IMPROVISASI: Input Keyboard
     document.addEventListener('keydown', (e) => {
-        if(!state.isPlaying) return;
+        if(!state.isPlaying) return; // Jika isPlaying false (saat feedback/modal), keyboard diabaikan
         
-        // Cek jika yang ditekan adalah angka 0-9
         if(e.key >= '0' && e.key <= '9') {
             pressNum(e.key);
         } 
-        // Cek jika Enter untuk OK
         else if(e.key === 'Enter') {
             checkAnswer();
         } 
-        // Cek jika Backspace untuk Clear
         else if(e.key === 'Backspace') {
             pressClear();
         }
