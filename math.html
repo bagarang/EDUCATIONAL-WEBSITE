@@ -2,724 +2,571 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MATEMATIKA IS FUN</title>
     <style>
-        /* --- DOODLE THEME & RESET --- */
-        :root {
-            --bg-color: #fcfcfc;
-            --paper-line: #a4b0be;
-            --pencil-black: #2f3542;
-            --doodle-blue: #3742fa;
-            --doodle-red: #ff4757;
-            --doodle-green: #2ed573;
-            --doodle-yellow: #ffa502;
-            --font-main: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
+        /* --- RESET --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        
         body {
             margin: 0;
             padding: 0;
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            background-image: 
-                linear-gradient(var(--paper-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
-            background-size: 100% 2rem, 2rem 100%;
-            color: var(--pencil-black);
+            background-color: #222; /* Dark background to frame the game */
             height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+
+        /* --- RIGID CONTAINER (360x640) --- */
+        #game-container {
+            width: 360px;
+            height: 640px;
+            background-color: #fcfcfc;
+            position: relative;
+            background-image: 
+                linear-gradient(#e0e0e0 1px, transparent 1px),
+                linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: -1px -1px;
+            border: 4px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+            /* Transform handled by JS for perfect scaling */
+        }
+
+        /* --- COMMON UI ELEMENTS --- */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
-        }
-
-        /* --- UI COMPONENTS --- */
-        .container {
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            position: relative;
-            display: flex;
-            flex-direction: column;
             padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        h1, h2, h3 {
-            text-align: center;
-            margin: 10px 0;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: var(--doodle-blue);
-            -webkit-text-stroke: 1.5px var(--pencil-black);
+            font-size: 2rem;
+            text-align: center;
+            color: #0984e3;
+            margin-top: 40px;
+            text-shadow: 3px 3px 0 #333;
             transform: rotate(-2deg);
         }
 
-        /* Buttons */
+        /* --- BUTTONS --- */
         .btn {
-            background: #fff;
-            border: 3px solid var(--pencil-black);
-            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-            padding: 15px 20px;
-            font-size: 1.2rem;
-            font-family: var(--font-main);
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 0;
-            transition: all 0.2s;
-            box-shadow: 4px 4px 0px var(--pencil-black);
-            text-align: center;
             width: 100%;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #333;
+            transition: transform 0.1s;
         }
 
         .btn:active {
             transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px var(--pencil-black);
+            box-shadow: 2px 2px 0 #333;
         }
 
-        .btn-start { background: var(--doodle-yellow); }
-        .btn-leaderboard { background: var(--doodle-green); color: white; }
-        .btn-back { background: var(--doodle-red); color: white; font-size: 1rem; padding: 10px;}
-        
-        .input-group {
-            margin: 20px 0;
-            text-align: center;
-        }
+        .btn-yellow { background: #fdcb6e; }
+        .btn-green { background: #00b894; color: white; }
+        .btn-red { background: #d63031; color: white; }
 
-        input[type="text"] {
-            border: 3px solid var(--pencil-black);
-            border-radius: 15px;
-            padding: 10px;
-            font-size: 1.2rem;
-            font-family: var(--font-main);
-            text-align: center;
-            width: 80%;
-            outline: none;
-            background: rgba(255,255,255,0.9);
-        }
-
-        /* --- SCREENS --- */
-        .screen {
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* --- GAME SCREEN LAYOUT --- */
+        #top-bar {
             width: 100%;
-            height: 100%;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- GAMEPLAY AREA --- */
-        .hud {
             display: flex;
             justify-content: space-between;
-            width: 100%;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            background: #fff;
-            border: 2px dashed var(--pencil-black);
-            padding: 10px;
-            border-radius: 10px;
+            align-items: center;
+            height: 40px;
+            margin-bottom: 10px;
         }
 
-        .timer-bar-container {
+        .quit-btn {
+            background: #d63031;
+            color: white;
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #333;
+        }
+
+        #info-bar {
             width: 100%;
-            height: 20px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Timer */
+        #timer-track {
+            width: 100%;
+            height: 15px;
             background: #eee;
-            border: 2px solid var(--pencil-black);
+            border: 2px solid #333;
             border-radius: 10px;
             margin-bottom: 20px;
-            overflow: hidden;
+            position: relative;
         }
-
-        .timer-bar {
+        #timer-fill {
             height: 100%;
-            background: var(--doodle-green);
+            background: #00b894;
             width: 100%;
-            transition: width 1s linear, background-color 0.3s;
+            transition: width 1s linear, background 0.3s;
         }
-
-        .question-box {
-            font-size: 4rem;
+        #timer-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
             font-weight: bold;
-            margin: 30px 0;
-            padding: 20px;
-            background: #fff;
-            border: 3px solid var(--pencil-black);
-            border-radius: 20px;
-            box-shadow: 8px 8px 0px var(--pencil-black);
-            text-align: center;
+        }
+
+        /* Question Area */
+        #game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             width: 100%;
         }
 
+        #question-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: #fff;
+            padding: 20px 40px;
+            border: 3px solid #333;
+            border-radius: 15px;
+            box-shadow: 5px 5px 0 #333;
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #input-display {
+            width: 80%;
+            height: 50px;
+            background: #f1f2f6;
+            border: 3px solid #333;
+            border-radius: 10px;
+            font-size: 2rem;
+            text-align: center;
+            line-height: 46px;
+            letter-spacing: 5px;
+            color: #0984e3;
+            font-family: inherit;
+            outline: none;
+        }
+
+        /* Numpad */
         .numpad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
             width: 100%;
+            height: 200px; /* Fixed height area */
         }
 
         .num-btn {
+            border: 2px solid #333;
+            border-radius: 8px;
             background: white;
-            border: 2px solid var(--pencil-black);
-            border-radius: 10px;
             font-size: 1.5rem;
-            padding: 15px 0;
+            font-weight: bold;
             cursor: pointer;
-            font-family: var(--font-main);
-            box-shadow: 3px 3px 0px var(--pencil-black);
+            box-shadow: 3px 3px 0 #333;
         }
+        .num-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #333; }
+        
+        .btn-c { background: #ffcccc; color: #d63031; }
+        .btn-ok { background: #00b894; color: white; grid-column: span 1; }
 
-        .num-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* --- LEADERBOARD & MODAL --- */
-        .leaderboard-list {
-            list-style: none;
-            padding: 0;
+        /* --- LEADERBOARD --- */
+        #lb-list {
             width: 100%;
-            max-height: 300px;
+            flex: 1;
+            background: #fff;
+            border: 2px solid #333;
             overflow-y: auto;
-            background: white;
-            border: 2px solid var(--pencil-black);
-            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 5px;
         }
-
-        .leaderboard-item {
+        
+        .lb-item {
             display: flex;
             justify-content: space-between;
             padding: 10px;
-            border-bottom: 1px dashed #ccc;
+            border-bottom: 1px dashed #333;
             font-weight: bold;
+            font-size: 0.9rem;
         }
-        
-        .leaderboard-item:nth-child(1) { background-color: #ffeaa7; } /* Gold */
-        .leaderboard-item:nth-child(2) { background-color: #dfe6e9; } /* Silver */
-        .leaderboard-item:nth-child(3) { background-color: #ff7675; color: white;} /* Bronze */
 
-        .modal-overlay {
-            position: fixed;
+        /* --- MODAL --- */
+        #modal-overlay {
+            position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.8);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
         }
 
-        .modal-content {
-            background: white;
-            border: 4px solid var(--pencil-black);
-            border-radius: 20px;
+        #modal-box {
+            width: 80%;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 15px;
             padding: 20px;
-            width: 90%;
-            max-width: 400px;
             text-align: center;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.5);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 8px 8px 0 #333;
+            animation: popIn 0.2s ease-out;
         }
+        
+        @keyframes popIn { from { transform: scale(0.8); } to { transform: scale(1); } }
 
-        @keyframes popIn {
-            from { transform: scale(0.5); }
-            to { transform: scale(1); }
-        }
-
-        .feedback-msg {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .correct { color: var(--doodle-green); }
-        .wrong { color: var(--doodle-red); }
-
-        /* Utility */
+        input[type="text"] { text-align: center; font-size: 1.1rem; border: 2px solid #333; border-radius: 8px; padding: 10px; width: 100%; font-family: inherit; }
         .hidden { display: none !important; }
 
-        /* Responsive */
-        @media (max-height: 600px) {
-            h1 { font-size: 1.8rem; }
-            .question-box { font-size: 3rem; padding: 10px; margin: 10px 0; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <!-- FIXED SCALE CONTAINER -->
+    <div id="game-container">
         
-        <!-- SCREEN 1: MAIN MENU -->
+        <!-- MENU SCREEN -->
         <div id="screen-menu" class="screen active">
-            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
-                <h1>MATEMATIKA IS FUN</h1>
-                <p style="text-align: center; font-style: italic; margin-bottom: 30px;">Tantang otakmu dengan perhitungan seru!</p>
-                
-                <div class="input-group">
-                    <input type="text" id="player-name" placeholder="Ketik Namamu..." maxlength="12">
-                </div>
-
-                <button class="btn btn-start" onclick="startGame()">START</button>
-                <button class="btn btn-leaderboard" onclick="showLeaderboard()">LEADERBOARD</button>
-                <button class="btn btn-back" onclick="window.location.href='index.html'">KEMBALI</button>
+            <h1>MATEMATIKA IS FUN</h1>
+            <div style="width:100%; margin-bottom:20px;">
+                <input type="text" id="player-name" placeholder="NAMA KAMU" maxlength="10">
             </div>
+            <button class="btn btn-yellow" onclick="startGame()">START</button>
+            <button class="btn btn-green" onclick="openLeaderboard()">LEADERBOARD</button>
+            <button class="btn btn-red" onclick="window.location.href='index.html'">KEMBALI</button>
         </div>
 
-        <!-- SCREEN 2: GAMEPLAY -->
+        <!-- GAME SCREEN -->
         <div id="screen-game" class="screen">
-            <div class="hud">
-                <span id="hud-name">Player</span>
-                <span id="hud-score">Score: 0</span>
-            </div>
-            
-            <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem;">
-                <span>Stage: <span id="hud-stage">1</span></span>
-                <span>Level: <span id="hud-level">1/5</span></span>
+            <div id="top-bar">
+                <div style="font-weight:bold; font-size:0.9rem;">Skor: <span id="score-val">0</span></div>
+                <button class="quit-btn" onclick="quitGame()">✕ QUIT</button>
             </div>
 
-            <div class="timer-bar-container">
-                <div id="timer-bar" class="timer-bar"></div>
+            <div id="info-bar">
+                <span id="player-display">Name</span>
+                <span id="stage-display">Stage 1 • Lvl 1/5</span>
             </div>
 
-            <div id="question-display" class="question-box">
-                <!-- Soal muncul di sini -->
-                1 + 1
+            <div id="timer-track">
+                <div id="timer-fill"></div>
+                <div id="timer-label">15s</div>
             </div>
 
-            <div class="input-group">
-                <input type="text" id="answer-input" readonly placeholder="?" style="font-size: 2rem; width: 60%; letter-spacing: 5px;">
+            <div id="game-area">
+                <div id="question-text">1 + 1</div>
+                <input type="text" id="input-display" readonly placeholder="?">
             </div>
 
             <div class="numpad">
-                <button class="num-btn" onclick="inputNum('1')">1</button>
-                <button class="num-btn" onclick="inputNum('2')">2</button>
-                <button class="num-btn" onclick="inputNum('3')">3</button>
-                <button class="num-btn" onclick="inputNum('4')">4</button>
-                <button class="num-btn" onclick="inputNum('5')">5</button>
-                <button class="num-btn" onclick="inputNum('6')">6</button>
-                <button class="num-btn" onclick="inputNum('7')">7</button>
-                <button class="num-btn" onclick="inputNum('8')">8</button>
-                <button class="num-btn" onclick="inputNum('9')">9</button>
-                <button class="num-btn" onclick="clearInput()" style="background: #ff6b6b; color: white;">C</button>
-                <button class="num-btn" onclick="inputNum('0')">0</button>
-                <button class="num-btn" onclick="submitAnswer()" style="background: #51cf66; color: white;">></button>
+                <button class="num-btn" onclick="press('1')">1</button>
+                <button class="num-btn" onclick="press('2')">2</button>
+                <button class="num-btn" onclick="press('3')">3</button>
+                <button class="num-btn" onclick="press('4')">4</button>
+                <button class="num-btn" onclick="press('5')">5</button>
+                <button class="num-btn" onclick="press('6')">6</button>
+                <button class="num-btn" onclick="press('7')">7</button>
+                <button class="num-btn" onclick="press('8')">8</button>
+                <button class="num-btn" onclick="press('9')">9</button>
+                <button class="num-btn btn-c" onclick="press('C')">C</button>
+                <button class="num-btn" onclick="press('0')">0</button>
+                <button class="num-btn btn-ok" onclick="checkAnswer()">OK</button>
             </div>
-            
-            <button class="btn btn-back" onclick="quitGame()" style="margin-top: 20px;">MENU UTAMA</button>
         </div>
 
-        <!-- SCREEN 3: LEADERBOARD -->
-        <div id="screen-leaderboard" class="screen">
-            <h2>PAPAN PERINGKAT</h2>
-            <ul id="leaderboard-ul" class="leaderboard-list">
-                <!-- Data akan diisi JS -->
-            </ul>
-            <button class="btn btn-start" onclick="showScreen('screen-menu')">KEMBALI</button>
+        <!-- LEADERBOARD SCREEN -->
+        <div id="screen-lb" class="screen">
+            <h2 style="margin-top:20px; text-shadow:2px 2px 0 #333; margin-bottom:10px;">JUARA</h2>
+            <div id="lb-list"></div>
+            <button class="btn btn-yellow" onclick="showScreen('screen-menu')">KEMBALI</button>
+        </div>
+
+        <!-- MODAL -->
+        <div id="modal-overlay">
+            <div id="modal-box">
+                <h3 id="m-title">Stage Selesai!</h3>
+                <p id="m-msg" style="font-weight:bold; font-size:1.2rem; margin:15px 0;">Score: 500</p>
+                <div id="m-actions">
+                    <button class="btn btn-green" onclick="nextStage()">NEXT</button>
+                    <button class="btn btn-yellow" onclick="retryStage()">RETRY</button>
+                    <button class="btn btn-red" onclick="quitGame()">MENU</button>
+                </div>
+                <div id="m-end" class="hidden">
+                    <button class="btn btn-green" onclick="quitGame()">SELESAI</button>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <!-- MODAL: STAGE COMPLETE / GAME OVER -->
-    <div id="modal-overlay" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="modal-title">Stage Selesai!</h2>
-            <div id="modal-msg" class="feedback-msg">Skor Kamu: 500</div>
-            
-            <div id="stage-options">
-                <button class="btn btn-leaderboard" onclick="nextStage()">NEXT STAGE</button>
-                <button class="btn btn-start" onclick="retryStage()">RETRY</button>
-                <button class="btn btn-back" onclick="quitGame()">MAIN MENU</button>
-            </div>
-
-            <div id="game-over-options" class="hidden">
-                <button class="btn btn-start" onclick="showScreen('screen-menu')">MAIN MENU</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- GAME VARIABLES ---
-        let gameState = {
-            playerName: "",
-            score: 0,
-            stage: 1, // 1-20
-            level: 1, // 1-5 per stage
-            currentAnswer: 0,
-            timer: 15,
-            timerInterval: null,
-            isPlaying: false
-        };
-
-        const TOTAL_LEVELS_PER_STAGE = 5;
-        const TOTAL_STAGES = 20;
-        const TIME_PER_LEVEL = 15;
-
-        // --- AUDIO SYSTEM (Web Audio API) ---
-        let audioCtx;
-        let isMuted = false;
+<script>
+    /* --- PRECISE SCALING LOGIC --- */
+    function scaleGame() {
+        const container = document.getElementById('game-container');
+        const baseW = 360;
+        const baseH = 640;
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
         
-        function initAudio() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-            }
-        }
+        // Calculate scale ratio
+        const scale = Math.min(winW / baseW, winH / baseH) * 0.95; // 0.95 for small padding
+        
+        container.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleGame);
+    window.addEventListener('load', scaleGame); // Init scale on load
 
-        function playTone(freq, type, duration, startTime) {
-            if (!audioCtx || isMuted) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            
-            osc.type = type; // sine, square, triangle, sawtooth
-            osc.frequency.value = freq;
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            osc.start(startTime);
-            
-            // Envelope to avoid clicking
-            gain.gain.setValueAtTime(0, startTime);
-            gain.gain.linearRampToValueAtTime(0.1, startTime + 0.1); // Soft volume
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-            
-            osc.stop(startTime + duration);
-        }
+    /* --- GAME LOGIC --- */
+    const CONFIG = {
+        maxStages: 20,
+        lvlPerStage: 5,
+        time: 15,
+        key: 'MATH_GAME_PRECISE_V1'
+    };
 
-        function playBackgroundMusic() {
-            if (!audioCtx) initAudio();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            // Simple Monotone Loop (Pentatonic-ish)
-            // Sequence: C4, E4, G4, A4, G4, E4...
-            const notes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
-            let noteIndex = 0;
-            const noteDuration = 0.5; // seconds per note
-            let nextNoteTime = audioCtx.currentTime;
+    let state = {
+        name: "", score: 0, stage: 1, lvl: 1,
+        timer: 15, timerId: null, ans: 0, isPlaying: false
+    };
 
-            function scheduleNote() {
-                while (nextNoteTime < audioCtx.currentTime + 0.1) {
-                    playTone(notes[noteIndex], 'sine', noteDuration, nextNoteTime);
-                    noteIndex = (noteIndex + 1) % notes.length;
-                    nextNoteTime += noteDuration;
-                }
-                if(gameState.isPlaying) {
-                    setTimeout(scheduleNote, 100);
-                }
-            }
-            scheduleNote();
-        }
+    let audioCtx = null;
 
-        function playSoundEffect(type) {
-            if (!audioCtx) return;
-            const now = audioCtx.currentTime;
-            if (type === 'correct') {
-                playTone(523.25, 'triangle', 0.1, now); // C5
-                playTone(659.25, 'triangle', 0.2, now + 0.1); // E5
-            } else if (type === 'wrong') {
-                playTone(200, 'sawtooth', 0.3, now);
-            } else if (type === 'click') {
-                playTone(400, 'sine', 0.05, now);
-            }
-        }
+    // --- AUDIO ---
+    function beep(freq, type, dur) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + dur);
+        osc.stop(audioCtx.currentTime + dur);
+    }
 
-        // --- NAVIGATION ---
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            playSoundEffect('click');
-        }
+    function playBg() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const n = [261, 329, 392, 440]; let i=0;
+        const loop = () => {
+            if(!state.isPlaying) return;
+            beep(n[i], 'sine', 0.3);
+            i = (i+1)%4;
+            setTimeout(loop, 400);
+        }; loop();
+    }
 
-        function quitGame() {
-            clearInterval(gameState.timerInterval);
-            gameState.isPlaying = false;
-            showScreen('screen-menu');
-            document.getElementById('player-name').value = ""; // Clear name or keep? Usually clear for privacy
-        }
+    // --- NAV ---
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-        // --- GAME LOGIC ---
-        function startGame() {
-            const nameInput = document.getElementById('player-name').value.trim();
-            if (nameInput === "") {
-                alert("Harap isi nama kamu dulu!");
-                return;
-            }
-            initAudio(); // Initialize audio context on user gesture
-            gameState.playerName = nameInput;
-            gameState.score = 0;
-            gameState.stage = 1;
-            gameState.level = 1;
-            gameState.isPlaying = true;
-            
-            document.getElementById('hud-name').textContent = gameState.playerName;
-            
-            showScreen('screen-game');
-            playBackgroundMusic();
-            startLevel();
-        }
+    function quitGame() {
+        clearInterval(state.timerId);
+        state.isPlaying = false;
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById('player-name').value = "";
+        showScreen('screen-menu');
+    }
 
-        function startLevel() {
-            // Reset Timer
-            gameState.timer = TIME_PER_LEVEL;
-            updateTimerUI();
-            clearInterval(gameState.timerInterval);
-            
-            // Generate Question
-            generateQuestion();
-            
-            // Clear Input
-            document.getElementById('answer-input').value = "";
-            
-            // Start Timer
-            gameState.timerInterval = setInterval(() => {
-                gameState.timer--;
-                updateTimerUI();
-                if (gameState.timer <= 0) {
-                    handleTimeOut();
-                }
-            }, 1000);
+    // --- GAMEPLAY ---
+    function startGame() {
+        const n = document.getElementById('player-name').value.trim();
+        if(!n) return alert("Nama wajib diisi!");
+        
+        state = { ...state, name: n, score: 0, stage: 1, lvl: 1, isPlaying: true };
+        document.getElementById('player-display').innerText = n;
+        showScreen('screen-game');
+        playBg();
+        startLevel();
+    }
 
-            // Update HUD
-            document.getElementById('hud-stage').textContent = gameState.stage;
-            document.getElementById('hud-level').textContent = gameState.level + "/" + TOTAL_LEVELS_PER_STAGE;
-            document.getElementById('hud-score').textContent = "Score: " + gameState.score;
-        }
+    function startLevel() {
+        clearInterval(state.timerId);
+        state.timer = CONFIG.time;
+        updateTimer();
+        document.getElementById('input-display').value = "";
+        
+        // HUD
+        document.getElementById('score-val').innerText = state.score;
+        document.getElementById('stage-display').innerText = `Stage ${state.stage} • Lvl ${state.lvl}/${CONFIG.lvlPerStage}`;
+        
+        genQ();
+        
+        state.timerId = setInterval(() => {
+            state.timer--;
+            updateTimer();
+            if(state.timer <= 0) handleTimeOut();
+        }, 1000);
+    }
 
-        function generateQuestion() {
-            let qText = "";
-            let a = 0, b = 0;
+    function updateTimer() {
+        const fill = document.getElementById('timer-fill');
+        const txt = document.getElementById('timer-label');
+        const pct = (state.timer / CONFIG.time) * 100;
+        fill.style.width = pct + "%";
+        txt.innerText = state.timer + "s";
+        fill.style.background = state.timer <= 5 ? "#d63031" : "#00b894";
+    }
 
-            // Stage 1-10: Penjumlahan (1-100)
-            if (gameState.stage <= 10) {
-                a = Math.floor(Math.random() * 50) + 1; // 1-50
-                b = Math.floor(Math.random() * 50) + 1; // 1-50 (Total max 100)
-                gameState.currentAnswer = a + b;
-                qText = `${a} + ${b}`;
-            } 
-            // Stage 11-20: Perkalian dan Pembagian
-            else {
-                const isMultiplication = Math.random() > 0.5;
-                
-                if (isMultiplication) {
-                    // Perkalian: Angka kecil (misal 1-12) agar anak SD bisa hitung 15 detik
-                    a = Math.floor(Math.random() * 10) + 2; // 2-11
-                    b = Math.floor(Math.random() * 9) + 2; // 2-10
-                    gameState.currentAnswer = a * b;
-                    qText = `${a} × ${b}`;
-                } else {
-                    // Pembagian: Pastikan hasilnya bulat
-                    b = Math.floor(Math.random() * 9) + 2; // Divisor 2-10
-                    let ans = Math.floor(Math.random() * 10) + 1; // Quotient 1-10
-                    a = b * ans; // Dividend
-                    gameState.currentAnswer = ans;
-                    qText = `${a} ÷ ${b}`;
-                }
-            }
-
-            document.getElementById('question-display').textContent = qText;
-        }
-
-        function updateTimerUI() {
-            const bar = document.getElementById('timer-bar');
-            const pct = (gameState.timer / TIME_PER_LEVEL) * 100;
-            bar.style.width = pct + "%";
-            
-            if (pct < 30) {
-                bar.style.backgroundColor = "var(--doodle-red)";
+    function genQ() {
+        let a,b,t;
+        if(state.stage <= 10) { // Penjumlahan
+            a = Math.floor(Math.random()*50)+1;
+            b = Math.floor(Math.random()*(100-a))+1;
+            state.ans = a+b;
+            t = `${a} + ${b}`;
+        } else { // Kali/Bagi
+            if(Math.random()>0.5) {
+                a = Math.floor(Math.random()*8)+2; // 2-9
+                b = Math.floor(Math.random()*8)+2;
+                state.ans = a*b;
+                t = `${a} × ${b}`;
             } else {
-                bar.style.backgroundColor = "var(--doodle-green)";
+                b = Math.floor(Math.random()*8)+2;
+                let res = Math.floor(Math.random()*10)+1;
+                a = b*res;
+                state.ans = res;
+                t = `${a} ÷ ${b}`;
             }
         }
+        document.getElementById('question-text').innerText = t;
+    }
 
-        // --- INPUT HANDLING ---
-        function inputNum(num) {
-            const input = document.getElementById('answer-input');
-            if (input.value.length < 5) {
-                input.value += num;
-            }
+    function press(k) {
+        const inp = document.getElementById('input-display');
+        if(k === 'C') inp.value = "";
+        else if(inp.value.length < 5) inp.value += k;
+    }
+
+    function checkAnswer() {
+        const v = parseInt(document.getElementById('input-display').value);
+        if(isNaN(v)) return;
+        
+        clearInterval(state.timerId);
+        if(v === state.ans) {
+            state.score += 100;
+            beep(600, 'triangle', 0.1);
+        } else {
+            state.score -= 50;
+            beep(150, 'sawtooth', 0.3);
         }
+        
+        setTimeout(() => {
+            state.lvl++;
+            if(state.lvl > CONFIG.lvlPerStage) finishStage();
+            else startLevel();
+        }, 500);
+    }
 
-        function clearInput() {
-            document.getElementById('answer-input').value = "";
+    function handleTimeOut() {
+        clearInterval(state.timerId);
+        state.score -= 50;
+        beep(150, 'sawtooth', 0.3);
+        setTimeout(() => {
+            state.lvl++;
+            if(state.lvl > CONFIG.lvlPerStage) finishStage();
+            else startLevel();
+        }, 1000);
+    }
+
+    // --- STAGE / LEADERBOARD ---
+    function finishStage() {
+        const m = document.getElementById('modal-overlay');
+        const t = document.getElementById('m-title');
+        const mg = document.getElementById('m-msg');
+        const a = document.getElementById('m-actions');
+        const e = document.getElementById('m-end');
+
+        saveScore(state.score);
+        m.style.display = 'flex';
+
+        if(state.stage >= CONFIG.maxStages) {
+            t.innerText = "SELESAI!";
+            mg.innerText = `Skor Akhir: ${state.score}`;
+            a.classList.add('hidden'); e.classList.remove('hidden');
+            state.isPlaying = false;
+        } else {
+            t.innerText = `Stage ${state.stage}`;
+            mg.innerText = `Skor: ${state.score}`;
+            a.classList.remove('hidden'); e.classList.add('hidden');
         }
+    }
 
-        function submitAnswer() {
-            const inputVal = document.getElementById('answer-input').value;
-            if (inputVal === "") return;
+    function nextStage() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        state.stage++; state.lvl = 1;
+        startLevel();
+    }
 
-            const playerAns = parseInt(inputVal);
-            
-            if (playerAns === gameState.currentAnswer) {
-                // Correct
-                gameState.score += 100;
-                playSoundEffect('correct');
-                showFeedback(true, "+100");
-            } else {
-                // Wrong
-                gameState.score -= 50;
-                playSoundEffect('wrong');
-                showFeedback(false, "-50");
-            }
+    function retryStage() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        state.lvl = 1; // Skor tetap
+        startLevel();
+    }
 
-            // Proceed Logic
-            clearInterval(gameState.timerInterval);
-            
-            // Small delay before next action
-            setTimeout(() => {
-                gameState.level++;
-                if (gameState.level > TOTAL_LEVELS_PER_STAGE) {
-                    finishStage();
-                } else {
-                    startLevel();
-                }
-            }, 1000);
-        }
+    function saveScore(s) {
+        if(s <= 0) return;
+        let d = JSON.parse(localStorage.getItem(CONFIG.key)) || [];
+        d.push({name: state.name, score: s});
+        d.sort((a,b)=>b.score-a.score);
+        d = d.slice(0, 10);
+        localStorage.setItem(CONFIG.key, JSON.stringify(d));
+    }
 
-        function handleTimeOut() {
-            clearInterval(gameState.timerInterval);
-            gameState.score -= 50; // Penalty
-            playSoundEffect('wrong');
-            showFeedback(false, "Waktu Habis! -50");
-            
-            setTimeout(() => {
-                gameState.level++;
-                if (gameState.level > TOTAL_LEVELS_PER_STAGE) {
-                    finishStage();
-                } else {
-                    startLevel();
-                }
-            }, 1500);
-        }
+    function openLeaderboard() {
+        const l = document.getElementById('lb-list');
+        l.innerHTML = "";
+        let d = JSON.parse(localStorage.getItem(CONFIG.key)) || [];
+        if(d.length===0) l.innerHTML = "<div style='padding:10px;text-align:center'>Kosong</div>";
+        d.forEach((x,i) => {
+            l.innerHTML += `<div class='lb-item'><span>#${i+1} ${x.name}</span><span>${x.score}</span></div>`;
+        });
+        showScreen('screen-lb');
+    }
+</script>
 
-        function showFeedback(isCorrect, text) {
-            const qBox = document.getElementById('question-display');
-            const originalText = qBox.textContent;
-            
-            qBox.style.color = isCorrect ? "var(--doodle-green)" : "var(--doodle-red)";
-            qBox.textContent = text;
-            
-            setTimeout(() => {
-                qBox.style.color = "var(--pencil-black)";
-                qBox.textContent = originalText; // Restore question or leave as is? Restore usually feels better.
-                // Actually, we generate a new question soon, so this just resets style.
-            }, 800);
-        }
-
-        // --- STAGE & LEADERBOARD LOGIC ---
-        function finishStage() {
-            const modal = document.getElementById('modal-overlay');
-            const title = document.getElementById('modal-title');
-            const msg = document.getElementById('modal-msg');
-            const stageOpt = document.getElementById('stage-options');
-            const gameOverOpt = document.getElementById('game-over-options');
-
-            modal.style.display = 'flex';
-
-            if (gameState.stage >= TOTAL_STAGES) {
-                // Game Completed
-                title.textContent = "SELAMAT! KAMU HEBAT!";
-                msg.textContent = `Kamu menyelesaikan semua stage! Skor Akhir: ${gameState.score}`;
-                stageOpt.classList.add('hidden');
-                gameOverOpt.classList.remove('hidden');
-                saveScore(gameState.score);
-                gameState.isPlaying = false;
-            } else {
-                // Stage Completed
-                title.textContent = `Stage ${gameState.stage} Selesai!`;
-                msg.textContent = `Skor Sementara: ${gameState.score}`;
-                stageOpt.classList.remove('hidden');
-                gameOverOpt.classList.add('hidden');
-                
-                // Save score at checkpoints too? User said "sharing score based on most score in 1x". 
-                // We usually save at Game Over or specific checkpoints. Let's save continuously if high score logic applies.
-                // But prompt implies "score terbanyak dalam 1x". Let's save at end of stages just in case they quit.
-                if (gameState.score > 0) saveScore(gameState.score);
-            }
-        }
-
-        function nextStage() {
-            document.getElementById('modal-overlay').style.display = 'none';
-            gameState.stage++;
-            gameState.level = 1;
-            startLevel();
-        }
-
-        function retryStage() {
-            document.getElementById('modal-overlay').style.display = 'none';
-            // Keep current stage, reset level 1. 
-            // Does score reset? Usually "Retry Stage" implies doing the stage again. 
-            // We will keep the accumulated score unless logic says otherwise.
-            gameState.level = 1; 
-            startLevel();
-        }
-
-        // --- LEADERBOARD (LocalStorage) ---
-        function saveScore(currentScore) {
-            if (currentScore <= 0) return;
-
-            let highScores = JSON.parse(localStorage.getItem('mathGameHighScores')) || [];
-            
-            // Check if player name exists to update, or push new
-            // Logic: "Sharing score berdasarkan score terbanyak dalam 1x"
-            // We create a new entry every time they finish a stage/game with a high score.
-            
-            const newEntry = {
-                name: gameState.playerName,
-                score: currentScore,
-                date: new Date().toLocaleDateString()
-            };
-
-            highScores.push(newEntry);
-            
-            // Sort descending
-            highScores.sort((a, b) => b.score - a.score);
-            
-            // Keep top 10
-            highScores = highScores.slice(0, 10);
-
-            localStorage.setItem('mathGameHighScores', JSON.stringify(highScores));
-        }
-
-        function showLeaderboard() {
-            const list = document.getElementById('leaderboard-ul');
-            list.innerHTML = "";
-            
-            let highScores = JSON.parse(localStorage.getItem('mathGameHighScores')) || [];
-
-            if (highScores.length === 0) {
-                list.innerHTML = "<li style='padding:10px; text-align:center;'>Belum ada data</li>";
-            } else {
-                highScores.forEach((entry, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'leaderboard-item';
-                    li.innerHTML = `
-                        <span>#${index+1} ${entry.name}</span>
-                        <span>${entry.score} pts</span>
-                    `;
-                    list.appendChild(li);
-                });
-            }
-            showScreen('screen-leaderboard');
-        }
-
-    </script>
 </body>
 </html>
