@@ -6,6 +6,7 @@
     <title>Pokémon Typing Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        /* KODE CSS TETAP SAMA (SESUAI REQUEST: TIDAK DIUBAH) */
         :root {
             --pokedex-red: #DC0A2D;
             --pokedex-dark: #89061C;
@@ -34,7 +35,6 @@
             overflow: hidden;
         }
 
-        /* CONTAINER UTAMA */
         #game-container {
             width: 95%;
             max-width: 900px;
@@ -50,7 +50,6 @@
             z-index: 10;
         }
 
-        /* --- MENU INTRO --- */
         #intro-screen {
             background: white;
             width: 100%; height: 100%;
@@ -109,7 +108,6 @@
         .btn-green { background-color: var(--ui-green); color: white; box-shadow: 0 8px 0 #2E7D32; }
         .btn-green:active { box-shadow: 0 0 0 #2E7D32; }
 
-        /* --- SCREEN GAMEPLAY --- */
         .screen-container {
             background-color: var(--screen-bg);
             border: 15px solid #dedede; border-radius: 20px;
@@ -184,7 +182,6 @@
         .dot.active { background: var(--ui-blue); transform: scale(1.3); }
         .dot.done { background: var(--ui-green); }
 
-        /* --- OVERLAYS --- */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); z-index: 50;
@@ -212,6 +209,10 @@
     </style>
 </head>
 <body>
+
+<audio id="bg-music" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+</audio>
 
 <div id="game-container">
     <div class="screen-container">
@@ -297,9 +298,11 @@
 
 <script>
     const allPokemon = [
-        {id:25, name:"Pikachu"}, {id:133, name:"Eevee"}, {id:39, name:"Jigglypuff"}, {id:52, name:"Meowth"}, 
-        {id:4, name:"Charmander"}, {id:7, name:"Squirtle"}, {id:1, name:"Bulbasaur"}, {id:35, name:"Clefairy"}, 
-        {id:54, name:"Psyduck"}, {id:58, name:"Growlithe"}, {id:63, name:"Abra"}, {id:66, name:"Machop"}
+        {id:1, name:"Bulbasaur"}, {id:4, name:"Charmander"}, {id:7, name:"Squirtle"}, {id:10, name:"Caterpie"}, 
+        {id:12, name:"Butterfree"}, {id:16, name:"Pidgey"}, {id:25, name:"Pikachu"}, {id:35, name:"Clefairy"}, 
+        {id:37, name:"Vulpix"}, {id:39, name:"Jigglypuff"}, {id:43, name:"Oddish"}, {id:50, name:"Diglett"}, 
+        {id:52, name:"Meowth"}, {id:54, name:"Psyduck"}, {id:58, name:"Growlithe"}, {id:63, name:"Abra"}, 
+        {id:66, name:"Machop"}, {id:133, name:"Eevee"}, {id:143, name:"Snorlax"}, {id:150, name:"Mewtwo"}
     ];
 
     const CONFIG = { maxLevels: 10, stagesPerLevel: 3, wordsPerStage: 10, timeLimit: 180 };
@@ -332,7 +335,8 @@
         resultScore: document.getElementById('result-score'),
         finalLevelScore: document.getElementById('final-level-score'),
         leaderboardBody: document.getElementById('leaderboard-body'),
-        gameContainer: document.getElementById('game-container')
+        gameContainer: document.getElementById('game-container'),
+        bgMusic: document.getElementById('bg-music')
     };
 
     function init() {
@@ -349,6 +353,11 @@
         state.playerName = name.toUpperCase();
         localStorage.setItem('pkmnPlayerName', state.playerName);
         els.introScreen.classList.add('hidden');
+        
+        // Play Music on start (Browser policy requires interaction)
+        els.bgMusic.volume = 0.3;
+        els.bgMusic.play();
+
         showLevelSelect();
     }
 
@@ -375,7 +384,7 @@
     function startLevel(levelIndex) {
         state.currentLevel = levelIndex;
         state.currentStage = 1;
-        state.score = 0; // Reset hanya saat mulai level baru
+        state.score = 0; 
         startStage();
     }
 
@@ -384,7 +393,24 @@
         state.wordIndex = 0;
         state.isPlaying = true;
         state.typedIndex = 0;
-        state.stageWords = [...allPokemon].sort(() => 0.5 - Math.random()).slice(0, CONFIG.wordsPerStage);
+
+        // --- IMPROVEMENT: DIFFICULTY FILTERING ---
+        let filteredPool = [];
+        if (state.currentLevel <= 3) {
+            // Easy: 1-5 letters
+            filteredPool = allPokemon.filter(p => p.name.length <= 5);
+        } else if (state.currentLevel <= 7) {
+            // Medium: 6-8 letters
+            filteredPool = allPokemon.filter(p => p.name.length > 5 && p.name.length <= 8);
+        } else {
+            // Hard: > 8 letters
+            filteredPool = allPokemon.filter(p => p.name.length > 8);
+        }
+
+        // Fallback if pool is too small
+        if (filteredPool.length < 5) filteredPool = [...allPokemon];
+
+        state.stageWords = filteredPool.sort(() => 0.5 - Math.random()).slice(0, CONFIG.wordsPerStage);
         
         els.levelSelect.classList.add('hidden');
         els.resultOverlay.classList.add('hidden');
@@ -440,7 +466,7 @@
                 loadWord();
             }
         } else {
-            // Getar HANYA saat salah
+            // IMPROVEMENT: Getar HANYA saat salah
             state.score = Math.max(0, state.score - 5);
             els.gameContainer.classList.add('shake');
             setTimeout(() => els.gameContainer.classList.remove('shake'), 300);
@@ -469,7 +495,7 @@
 
     function quitGame() {
         if (confirm("Keluar dan simpan skor terakhir?")) {
-            saveScore(state.score); // Simpan skor saat Quit
+            saveScore(state.score); // Simpan skor sebelum Quit
             state.isPlaying = false;
             clearInterval(state.timerInterval);
             showLevelSelect();
@@ -477,11 +503,13 @@
     }
 
     function winStage() {
-        saveScore(state.score); // Simpan skor setiap stage selesai
         state.isPlaying = false;
         clearInterval(state.timerInterval);
-        if (state.currentStage === CONFIG.stagesPerLevel) triggerEvolutionSequence();
-        else {
+        
+        if (state.currentStage === CONFIG.stagesPerLevel) {
+            saveScore(state.score); // Simpan skor saat Level Berakhir (Stage 3)
+            triggerEvolutionSequence();
+        } else {
             els.resultOverlay.classList.remove('hidden');
             els.resultScore.innerText = state.score;
         }
@@ -511,12 +539,13 @@
         els.resultScore.innerText = state.score;
     }
 
+    // --- IMPROVEMENT: LEADERBOARD LOGIC ---
     function saveScore(score) {
         if (score <= 0 || !state.playerName) return;
         let lbData = localStorage.getItem('pkmnLeaderboard');
         let lb = lbData ? JSON.parse(lbData) : [];
         
-        // Simpan setiap percobaan sebagai baris baru
+        // Simpan setiap percobaan unik dengan timestamp
         lb.push({ 
             name: state.playerName, 
             level: state.currentLevel, 
@@ -524,6 +553,7 @@
             date: new Date().toLocaleString() 
         });
         
+        // Sortir skor tertinggi
         lb.sort((a,b) => b.score - a.score);
         localStorage.setItem('pkmnLeaderboard', JSON.stringify(lb.slice(0, 10)));
         updateLeaderboardUI();
