@@ -2,571 +2,289 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MATEMATIKA IS FUN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- RESET --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        
+        :root {
+            --bg-paper: #fdfbf7;
+            --grid-color: rgba(0, 168, 255, 0.1);
+            --margin-line: rgba(255, 121, 121, 0.5);
+            --ink-black: #2d3436;
+            --doodle-blue: #0984e3;
+            --doodle-red: #d63031;
+            --doodle-green: #00b894;
+            --doodle-yellow: #fdcb6e;
+            --border: 3px solid var(--ink-black);
+            --shadow: 5px 5px 0px var(--ink-black);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #222; /* Dark background to frame the game */
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-        }
-
-        /* --- RIGID CONTAINER (360x640) --- */
-        #game-container {
-            width: 360px;
-            height: 640px;
-            background-color: #fcfcfc;
-            position: relative;
+            margin: 0; padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            background-color: var(--bg-paper);
             background-image: 
-                linear-gradient(#e0e0e0 1px, transparent 1px),
-                linear-gradient(90deg, #e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-position: -1px -1px;
-            border: 4px solid #333;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            overflow: hidden;
-            /* Transform handled by JS for perfect scaling */
+                linear-gradient(90deg, var(--margin-line) 2px, transparent 2px),
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 100%, 20px 20px, 20px 20px;
+            background-position: 40px 0, 0 0, 0 0;
+            height: 100dvh; width: 100vw;
+            display: flex; justify-content: center; overflow: hidden;
         }
 
-        /* --- COMMON UI ELEMENTS --- */
-        .screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+        #app-container {
+            width: 100%; max-width: 450px;
+            height: 100%; display: flex; flex-direction: column;
+            padding: 15px; padding-bottom: calc(15px + env(safe-area-inset-bottom));
         }
 
-        .screen.active {
-            opacity: 1;
-            pointer-events: all;
-            z-index: 10;
+        .screen { display: none; flex-direction: column; height: 100%; width: 100%; animation: popIn 0.3s ease; }
+        .screen.active { display: flex; }
+        @keyframes popIn { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- HEADER --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; height: 50px; flex-shrink: 0; }
+        .badge {
+            background: white; border: var(--border); padding: 5px 12px; border-radius: 50px;
+            font-weight: 700; box-shadow: 3px 3px 0px var(--ink-black); font-size: 0.9rem;
         }
 
-        h1 {
-            font-size: 2rem;
-            text-align: center;
-            color: #0984e3;
-            margin-top: 40px;
-            text-shadow: 3px 3px 0 #333;
-            transform: rotate(-2deg);
+        .timer-container { width: 100%; height: 14px; background: white; border: var(--border); border-radius: 10px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
+        .timer-fill { height: 100%; width: 100%; background: var(--doodle-green); transition: width 1s linear; }
+
+        /* --- MAIN AREA (QUESTION) --- */
+        .game-main {
+            flex: 1; /* Mengambil sisa ruang */
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 0; /* Penting agar flex-child bisa mengecil */
         }
 
-        /* --- BUTTONS --- */
-        .btn {
-            width: 100%;
-            background: white;
-            border: 3px solid #333;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin: 10px 0;
-            cursor: pointer;
-            box-shadow: 4px 4px 0 #333;
-            transition: transform 0.1s;
+        .q-card {
+            background: white; border: var(--border); border-radius: 20px;
+            width: 100%; max-height: 90%; /* Cegah tumpah */
+            padding: 20px; text-align: center; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; justify-content: center;
         }
 
-        .btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0 #333;
-        }
+        #question-text { font-size: clamp(2.5rem, 8vh, 4rem); font-weight: 700; margin: 0; color: var(--ink-black); }
+        #answer-view { font-size: 3.5rem; color: var(--doodle-blue); min-height: 70px; font-weight: 700; margin-top: 5px; }
 
-        .btn-yellow { background: #fdcb6e; }
-        .btn-green { background: #00b894; color: white; }
-        .btn-red { background: #d63031; color: white; }
+        /* --- NUMPAD (LOCKED AT BOTTOM) --- */
+        .numpad-container { flex-shrink: 0; padding-top: 10px; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
-        /* --- GAME SCREEN LAYOUT --- */
-        #top-bar {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 40px;
-            margin-bottom: 10px;
+        .num-key {
+            background: white; border: var(--border); padding: clamp(12px, 3vh, 18px); 
+            font-size: 1.8rem; font-weight: 700; border-radius: 15px; 
+            box-shadow: 3px 3px 0px var(--ink-black); cursor: pointer; transition: 0.1s;
+            display: flex; justify-content: center; align-items: center;
         }
+        .num-key:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px var(--ink-black); }
+        .key-del { background: #ff7675; color: white; }
+        .key-ok { background: var(--doodle-green); color: white; }
 
-        .quit-btn {
-            background: #d63031;
-            color: white;
-            border: 2px solid #333;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 2px 2px 0 #333;
-        }
-
-        #info-bar {
-            width: 100%;
-            background: #fff;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-        }
-
-        /* Timer */
-        #timer-track {
-            width: 100%;
-            height: 15px;
-            background: #eee;
-            border: 2px solid #333;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        #timer-fill {
-            height: 100%;
-            background: #00b894;
-            width: 100%;
-            transition: width 1s linear, background 0.3s;
-        }
-        #timer-label {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        /* Question Area */
-        #game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-
-        #question-text {
-            font-size: 4rem;
-            font-weight: 900;
-            background: #fff;
-            padding: 20px 40px;
-            border: 3px solid #333;
-            border-radius: 15px;
-            box-shadow: 5px 5px 0 #333;
-            margin-bottom: 20px;
-            width: 100%;
-            text-align: center;
-        }
-
-        #input-display {
-            width: 80%;
-            height: 50px;
-            background: #f1f2f6;
-            border: 3px solid #333;
-            border-radius: 10px;
-            font-size: 2rem;
-            text-align: center;
-            line-height: 46px;
-            letter-spacing: 5px;
-            color: #0984e3;
-            font-family: inherit;
-            outline: none;
-        }
-
-        /* Numpad */
-        .numpad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            width: 100%;
-            height: 200px; /* Fixed height area */
-        }
-
-        .num-btn {
-            border: 2px solid #333;
-            border-radius: 8px;
-            background: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 3px 3px 0 #333;
-        }
-        .num-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #333; }
-        
-        .btn-c { background: #ffcccc; color: #d63031; }
-        .btn-ok { background: #00b894; color: white; grid-column: span 1; }
-
-        /* --- LEADERBOARD --- */
-        #lb-list {
-            width: 100%;
-            flex: 1;
-            background: #fff;
-            border: 2px solid #333;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            padding: 5px;
-        }
-        
-        .lb-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px dashed #333;
-            font-weight: bold;
-            font-size: 0.9rem;
+        /* --- EFFECTS --- */
+        .wrong-ans { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); color: var(--doodle-red); }
+            75% { transform: translateX(8px); }
         }
 
         /* --- MODAL --- */
-        #modal-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        #modal-box {
-            width: 80%;
-            background: #fff;
-            border: 3px solid #333;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 8px 8px 0 #333;
-            animation: popIn 0.2s ease-out;
-        }
-        
-        @keyframes popIn { from { transform: scale(0.8); } to { transform: scale(1); } }
-
-        input[type="text"] { text-align: center; font-size: 1.1rem; border: 2px solid #333; border-radius: 8px; padding: 10px; width: 100%; font-family: inherit; }
-        .hidden { display: none !important; }
-
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-box { background: white; border: var(--border); border-radius: 25px; padding: 25px; width: 100%; max-width: 320px; text-align: center; box-shadow: 8px 8px 0px var(--ink-black); }
     </style>
 </head>
-<body>
+<body id="body-bg">
 
-    <!-- FIXED SCALE CONTAINER -->
-    <div id="game-container">
-        
-        <!-- MENU SCREEN -->
-        <div id="screen-menu" class="screen active">
-            <h1>MATEMATIKA IS FUN</h1>
-            <div style="width:100%; margin-bottom:20px;">
-                <input type="text" id="player-name" placeholder="NAMA KAMU" maxlength="10">
-            </div>
-            <button class="btn btn-yellow" onclick="startGame()">START</button>
-            <button class="btn btn-green" onclick="openLeaderboard()">LEADERBOARD</button>
-            <button class="btn btn-red" onclick="window.location.href='index.html'">KEMBALI</button>
+<div id="app-container">
+
+    <div id="screen-menu" class="screen active">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; padding: 10px;">
+            <h1 style="font-size: 2.5rem; color: var(--doodle-blue); transform: rotate(-1deg); margin-bottom: 25px;">Matematika<br>Pintar! ✏️</h1>
+            <input type="text" id="player-name" placeholder="Siapa namamu?" maxlength="12" 
+                   style="width: 100%; font-size: 1.2rem; padding: 14px; border: var(--border); border-radius: 12px; text-align: center; margin-bottom: 15px; font-family: inherit;">
+            
+            <button class="num-key" onclick="startGame()" style="width:100%; background: var(--doodle-yellow); margin-bottom:12px;">MAIN SEKARANG</button>
+            <button class="num-key" onclick="showLeaderboard()" style="width:100%; background: var(--doodle-green); color:white; font-size: 1.2rem; margin-bottom:12px;">LEADERBOARD</button>
+            <button class="num-key" onclick="window.location.href='index.html'" style="width:100%; background: #636e72; color:white; font-size: 1.2rem;">KEMBALI</button>
         </div>
-
-        <!-- GAME SCREEN -->
-        <div id="screen-game" class="screen">
-            <div id="top-bar">
-                <div style="font-weight:bold; font-size:0.9rem;">Skor: <span id="score-val">0</span></div>
-                <button class="quit-btn" onclick="quitGame()">✕ QUIT</button>
-            </div>
-
-            <div id="info-bar">
-                <span id="player-display">Name</span>
-                <span id="stage-display">Stage 1 • Lvl 1/5</span>
-            </div>
-
-            <div id="timer-track">
-                <div id="timer-fill"></div>
-                <div id="timer-label">15s</div>
-            </div>
-
-            <div id="game-area">
-                <div id="question-text">1 + 1</div>
-                <input type="text" id="input-display" readonly placeholder="?">
-            </div>
-
-            <div class="numpad">
-                <button class="num-btn" onclick="press('1')">1</button>
-                <button class="num-btn" onclick="press('2')">2</button>
-                <button class="num-btn" onclick="press('3')">3</button>
-                <button class="num-btn" onclick="press('4')">4</button>
-                <button class="num-btn" onclick="press('5')">5</button>
-                <button class="num-btn" onclick="press('6')">6</button>
-                <button class="num-btn" onclick="press('7')">7</button>
-                <button class="num-btn" onclick="press('8')">8</button>
-                <button class="num-btn" onclick="press('9')">9</button>
-                <button class="num-btn btn-c" onclick="press('C')">C</button>
-                <button class="num-btn" onclick="press('0')">0</button>
-                <button class="num-btn btn-ok" onclick="checkAnswer()">OK</button>
-            </div>
-        </div>
-
-        <!-- LEADERBOARD SCREEN -->
-        <div id="screen-lb" class="screen">
-            <h2 style="margin-top:20px; text-shadow:2px 2px 0 #333; margin-bottom:10px;">JUARA</h2>
-            <div id="lb-list"></div>
-            <button class="btn btn-yellow" onclick="showScreen('screen-menu')">KEMBALI</button>
-        </div>
-
-        <!-- MODAL -->
-        <div id="modal-overlay">
-            <div id="modal-box">
-                <h3 id="m-title">Stage Selesai!</h3>
-                <p id="m-msg" style="font-weight:bold; font-size:1.2rem; margin:15px 0;">Score: 500</p>
-                <div id="m-actions">
-                    <button class="btn btn-green" onclick="nextStage()">NEXT</button>
-                    <button class="btn btn-yellow" onclick="retryStage()">RETRY</button>
-                    <button class="btn btn-red" onclick="quitGame()">MENU</button>
-                </div>
-                <div id="m-end" class="hidden">
-                    <button class="btn btn-green" onclick="quitGame()">SELESAI</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
+    <div id="screen-game" class="screen">
+        <div class="top-bar">
+            <div class="badge">⭐ <span id="hud-score">0</span></div>
+            <div class="badge" id="hud-stage">Stage 1</div>
+            <button class="badge" style="cursor: pointer; background: #ff7675; color: white;" onclick="confirmQuit()">✕</button>
+        </div>
+
+        <div class="timer-container">
+            <div id="timer-bar" class="timer-fill"></div>
+        </div>
+
+        <div class="game-main">
+            <div class="q-card" id="q-card">
+                <p id="question-text">0 + 0</p>
+                <div id="answer-view">?</div>
+            </div>
+        </div>
+
+        <div class="numpad-container">
+            <div class="numpad">
+                <button class="num-key" onclick="pressNum('1')">1</button>
+                <button class="num-key" onclick="pressNum('2')">2</button>
+                <button class="num-key" onclick="pressNum('3')">3</button>
+                <button class="num-key" onclick="pressNum('4')">4</button>
+                <button class="num-key" onclick="pressNum('5')">5</button>
+                <button class="num-key" onclick="pressNum('6')">6</button>
+                <button class="num-key" onclick="pressNum('7')">7</button>
+                <button class="num-key" onclick="pressNum('8')">8</button>
+                <button class="num-key" onclick="pressNum('9')">9</button>
+                <button class="num-key key-del" onclick="pressClear()">C</button>
+                <button class="num-key" onclick="pressNum('0')">0</button>
+                <button class="num-key key-ok" onclick="checkAnswer()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-lb" class="screen">
+        <h1 style="text-align: center; color: var(--doodle-blue); font-size: 2rem;">Papan Juara 🏆</h1>
+        <div id="lb-list" style="background: white; border: var(--border); border-radius: 15px; flex: 1; overflow-y: auto; padding: 10px; margin: 10px 0;"></div>
+        <button class="num-key" onclick="showScreen('screen-menu')" style="width:100%; background: var(--doodle-yellow);">KEMBALI</button>
+    </div>
+
+</div>
+
+<div id="modal-res" class="modal">
+    <div class="modal-box">
+        <h2 id="modal-title">Hebat!</h2>
+        <div id="modal-score" style="font-size: 2.8rem; color: var(--doodle-blue); font-weight: 800; margin: 15px 0;">500</div>
+        <p id="modal-msg" style="font-weight: 600; margin-bottom: 20px;">Kamu menyelesaikan Stage!</p>
+        <button class="num-key" id="modal-btn" onclick="handleModal()" style="width: 100%; background: var(--doodle-green); color:white;">LANJUT</button>
+    </div>
+</div>
+
 <script>
-    /* --- PRECISE SCALING LOGIC --- */
-    function scaleGame() {
-        const container = document.getElementById('game-container');
-        const baseW = 360;
-        const baseH = 640;
-        const winW = window.innerWidth;
-        const winH = window.innerHeight;
-        
-        // Calculate scale ratio
-        const scale = Math.min(winW / baseW, winH / baseH) * 0.95; // 0.95 for small padding
-        
-        container.style.transform = `scale(${scale})`;
-    }
-    window.addEventListener('resize', scaleGame);
-    window.addEventListener('load', scaleGame); // Init scale on load
+    const CONFIG = { time: 15, key: 'MATH_Doodle_V2' };
+    let state = { name: '', score: 0, stage: 1, level: 1, timer: 15, timerId: null, ans: 0, input: '', isPlaying: false };
 
-    /* --- GAME LOGIC --- */
-    const CONFIG = {
-        maxStages: 20,
-        lvlPerStage: 5,
-        time: 15,
-        key: 'MATH_GAME_PRECISE_V1'
-    };
-
-    let state = {
-        name: "", score: 0, stage: 1, lvl: 1,
-        timer: 15, timerId: null, ans: 0, isPlaying: false
-    };
-
-    let audioCtx = null;
-
-    // --- AUDIO ---
-    function beep(freq, type, dur) {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        osc.connect(g);
-        g.connect(audioCtx.destination);
-        osc.start();
-        g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + dur);
-        osc.stop(audioCtx.currentTime + dur);
-    }
-
-    function playBg() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const n = [261, 329, 392, 440]; let i=0;
-        const loop = () => {
-            if(!state.isPlaying) return;
-            beep(n[i], 'sine', 0.3);
-            i = (i+1)%4;
-            setTimeout(loop, 400);
-        }; loop();
-    }
-
-    // --- NAV ---
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    function quitGame() {
-        clearInterval(state.timerId);
-        state.isPlaying = false;
-        document.getElementById('modal-overlay').style.display = 'none';
-        document.getElementById('player-name').value = "";
-        showScreen('screen-menu');
-    }
-
-    // --- GAMEPLAY ---
     function startGame() {
         const n = document.getElementById('player-name').value.trim();
-        if(!n) return alert("Nama wajib diisi!");
-        
-        state = { ...state, name: n, score: 0, stage: 1, lvl: 1, isPlaying: true };
-        document.getElementById('player-display').innerText = n;
+        if(!n) return alert("Isi namamu dulu!");
+        state = { ...state, name: n, score: 0, stage: 1, level: 1, isPlaying: true };
+        document.getElementById('hud-score').innerText = '0';
         showScreen('screen-game');
-        playBg();
-        startLevel();
+        newQ();
     }
 
-    function startLevel() {
+    function newQ() {
+        state.input = '';
+        document.getElementById('answer-view').innerText = '?';
+        document.getElementById('answer-view').style.color = 'var(--doodle-blue)';
+        
+        let a, b, op = '+';
+        if(state.stage <= 5) { a = r(15)+1; b = r(15)+1; state.ans = a + b; }
+        else if(state.stage <= 10) { a = r(50)+5; b = r(40)+5; state.ans = a + b; }
+        else { a = r(10)+2; b = r(10)+2; op = '×'; state.ans = a * b; }
+        
+        document.getElementById('question-text').innerText = `${a} ${op} ${b}`;
+        startT();
+    }
+
+    function r(max) { return Math.floor(Math.random() * max); }
+
+    function startT() {
         clearInterval(state.timerId);
         state.timer = CONFIG.time;
-        updateTimer();
-        document.getElementById('input-display').value = "";
-        
-        // HUD
-        document.getElementById('score-val').innerText = state.score;
-        document.getElementById('stage-display').innerText = `Stage ${state.stage} • Lvl ${state.lvl}/${CONFIG.lvlPerStage}`;
-        
-        genQ();
-        
+        updateTUI();
         state.timerId = setInterval(() => {
             state.timer--;
-            updateTimer();
-            if(state.timer <= 0) handleTimeOut();
+            updateTUI();
+            if(state.timer <= 0) { clearInterval(state.timerId); feedback(false); }
         }, 1000);
     }
 
-    function updateTimer() {
-        const fill = document.getElementById('timer-fill');
-        const txt = document.getElementById('timer-label');
-        const pct = (state.timer / CONFIG.time) * 100;
-        fill.style.width = pct + "%";
-        txt.innerText = state.timer + "s";
-        fill.style.background = state.timer <= 5 ? "#d63031" : "#00b894";
+    function updateTUI() {
+        const f = document.getElementById('timer-bar');
+        f.style.width = (state.timer / CONFIG.time) * 100 + '%';
+        f.style.background = state.timer <= 5 ? 'var(--doodle-red)' : 'var(--doodle-green)';
     }
 
-    function genQ() {
-        let a,b,t;
-        if(state.stage <= 10) { // Penjumlahan
-            a = Math.floor(Math.random()*50)+1;
-            b = Math.floor(Math.random()*(100-a))+1;
-            state.ans = a+b;
-            t = `${a} + ${b}`;
-        } else { // Kali/Bagi
-            if(Math.random()>0.5) {
-                a = Math.floor(Math.random()*8)+2; // 2-9
-                b = Math.floor(Math.random()*8)+2;
-                state.ans = a*b;
-                t = `${a} × ${b}`;
-            } else {
-                b = Math.floor(Math.random()*8)+2;
-                let res = Math.floor(Math.random()*10)+1;
-                a = b*res;
-                state.ans = res;
-                t = `${a} ÷ ${b}`;
-            }
-        }
-        document.getElementById('question-text').innerText = t;
-    }
-
-    function press(k) {
-        const inp = document.getElementById('input-display');
-        if(k === 'C') inp.value = "";
-        else if(inp.value.length < 5) inp.value += k;
-    }
+    function pressNum(n) { if(state.input.length < 4) { state.input += n; document.getElementById('answer-view').innerText = state.input; } }
+    function pressClear() { state.input = ''; document.getElementById('answer-view').innerText = '?'; }
 
     function checkAnswer() {
-        const v = parseInt(document.getElementById('input-display').value);
-        if(isNaN(v)) return;
-        
+        if(!state.input) return;
         clearInterval(state.timerId);
-        if(v === state.ans) {
+        feedback(parseInt(state.input) === state.ans);
+    }
+
+    function feedback(correct) {
+        const card = document.getElementById('q-card');
+        const view = document.getElementById('answer-view');
+        if(correct) {
             state.score += 100;
-            beep(600, 'triangle', 0.1);
+            view.style.color = 'var(--doodle-green)';
+            setTimeout(next, 400);
         } else {
-            state.score -= 50;
-            beep(150, 'sawtooth', 0.3);
+            card.classList.add('wrong-ans');
+            view.style.color = 'var(--doodle-red)';
+            view.innerText = state.ans;
+            setTimeout(() => { card.classList.remove('wrong-ans'); next(); }, 1000);
         }
-        
-        setTimeout(() => {
-            state.lvl++;
-            if(state.lvl > CONFIG.lvlPerStage) finishStage();
-            else startLevel();
-        }, 500);
+        document.getElementById('hud-score').innerText = state.score;
     }
 
-    function handleTimeOut() {
-        clearInterval(state.timerId);
-        state.score -= 50;
-        beep(150, 'sawtooth', 0.3);
-        setTimeout(() => {
-            state.lvl++;
-            if(state.lvl > CONFIG.lvlPerStage) finishStage();
-            else startLevel();
-        }, 1000);
-    }
-
-    // --- STAGE / LEADERBOARD ---
-    function finishStage() {
-        const m = document.getElementById('modal-overlay');
-        const t = document.getElementById('m-title');
-        const mg = document.getElementById('m-msg');
-        const a = document.getElementById('m-actions');
-        const e = document.getElementById('m-end');
-
-        saveScore(state.score);
-        m.style.display = 'flex';
-
-        if(state.stage >= CONFIG.maxStages) {
-            t.innerText = "SELESAI!";
-            mg.innerText = `Skor Akhir: ${state.score}`;
-            a.classList.add('hidden'); e.classList.remove('hidden');
-            state.isPlaying = false;
-        } else {
-            t.innerText = `Stage ${state.stage}`;
-            mg.innerText = `Skor: ${state.score}`;
-            a.classList.remove('hidden'); e.classList.add('hidden');
+    function next() {
+        state.level++;
+        if(state.level > 5) { showMod(); }
+        else {
+            document.getElementById('hud-stage').innerText = `Stage ${state.stage} (${state.level}/5)`;
+            newQ();
         }
     }
 
-    function nextStage() {
-        document.getElementById('modal-overlay').style.display = 'none';
-        state.stage++; state.lvl = 1;
-        startLevel();
+    function showMod() {
+        saveLB();
+        document.getElementById('modal-score').innerText = state.score;
+        document.getElementById('modal-res').style.display = 'flex';
     }
 
-    function retryStage() {
-        document.getElementById('modal-overlay').style.display = 'none';
-        state.lvl = 1; // Skor tetap
-        startLevel();
+    function handleModal() {
+        document.getElementById('modal-res').style.display = 'none';
+        state.stage++; state.level = 1;
+        document.getElementById('hud-stage').innerText = `Stage ${state.stage}`;
+        newQ();
     }
 
-    function saveScore(s) {
-        if(s <= 0) return;
+    function saveLB() {
         let d = JSON.parse(localStorage.getItem(CONFIG.key)) || [];
-        d.push({name: state.name, score: s});
-        d.sort((a,b)=>b.score-a.score);
-        d = d.slice(0, 10);
-        localStorage.setItem(CONFIG.key, JSON.stringify(d));
+        d.push({ n: state.name, s: state.score });
+        d.sort((a,b) => b.s - a.s);
+        localStorage.setItem(CONFIG.key, JSON.stringify(d.slice(0, 10)));
     }
 
-    function openLeaderboard() {
+    function showLeaderboard() {
         const l = document.getElementById('lb-list');
-        l.innerHTML = "";
-        let d = JSON.parse(localStorage.getItem(CONFIG.key)) || [];
-        if(d.length===0) l.innerHTML = "<div style='padding:10px;text-align:center'>Kosong</div>";
-        d.forEach((x,i) => {
-            l.innerHTML += `<div class='lb-item'><span>#${i+1} ${x.name}</span><span>${x.score}</span></div>`;
-        });
+        const d = JSON.parse(localStorage.getItem(CONFIG.key)) || [];
+        l.innerHTML = d.length ? d.map((x, i) => `
+            <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:2px dashed #ccc; font-weight:600;">
+                <span>#${i+1} ${x.n}</span>
+                <span style="color:var(--doodle-blue)">${x.s}</span>
+            </div>`).join('') : '<p style="text-align:center; padding:20px;">Belum ada skor.</p>';
         showScreen('screen-lb');
     }
-</script>
 
+    function confirmQuit() { if(confirm("Keluar game?")) location.reload(); }
+</script>
 </body>
 </html>
