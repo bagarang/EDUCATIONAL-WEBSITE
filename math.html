@@ -45,7 +45,6 @@
         .screen.active { display: flex; }
         @keyframes popIn { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* --- HEADER --- */
         .top-bar { display: flex; justify-content: space-between; align-items: center; height: 50px; flex-shrink: 0; }
         .badge {
             background: white; border: var(--border); padding: 5px 12px; border-radius: 50px;
@@ -55,24 +54,20 @@
         .timer-container { width: 100%; height: 14px; background: white; border: var(--border); border-radius: 10px; overflow: hidden; margin: 10px 0; flex-shrink: 0; }
         .timer-fill { height: 100%; width: 100%; background: var(--doodle-green); transition: width 1s linear; }
 
-        /* --- MAIN AREA (QUESTION) --- */
         .game-main {
-            flex: 1; /* Mengambil sisa ruang */
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 0; /* Penting agar flex-child bisa mengecil */
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 0;
         }
 
         .q-card {
             background: white; border: var(--border); border-radius: 20px;
-            width: 100%; max-height: 90%; /* Cegah tumpah */
-            padding: 20px; text-align: center; box-shadow: var(--shadow);
+            width: 100%; max-height: 90%; padding: 20px; text-align: center; box-shadow: var(--shadow);
             display: flex; flex-direction: column; justify-content: center;
         }
 
         #question-text { font-size: clamp(2.5rem, 8vh, 4rem); font-weight: 700; margin: 0; color: var(--ink-black); }
         #answer-view { font-size: 3.5rem; color: var(--doodle-blue); min-height: 70px; font-weight: 700; margin-top: 5px; }
 
-        /* --- NUMPAD (LOCKED AT BOTTOM) --- */
         .numpad-container { flex-shrink: 0; padding-top: 10px; }
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
@@ -80,23 +75,24 @@
             background: white; border: var(--border); padding: clamp(12px, 3vh, 18px); 
             font-size: 1.8rem; font-weight: 700; border-radius: 15px; 
             box-shadow: 3px 3px 0px var(--ink-black); cursor: pointer; transition: 0.1s;
-            display: flex; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center; font-family: inherit;
         }
         .num-key:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px var(--ink-black); }
         .key-del { background: #ff7675; color: white; }
         .key-ok { background: var(--doodle-green); color: white; }
 
-        /* --- EFFECTS --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-box { background: white; border: var(--border); border-radius: 25px; padding: 25px; width: 100%; max-width: 320px; text-align: center; box-shadow: 8px 8px 0px var(--ink-black); }
+
+        /* Styling Tombol di Modal agar Seragam */
+        .btn-modal { width: 100%; margin-bottom: 10px; padding: 12px; font-size: 1.1rem; }
+
         .wrong-ans { animation: shake 0.4s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-8px); color: var(--doodle-red); }
             75% { transform: translateX(8px); }
         }
-
-        /* --- MODAL --- */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-box { background: white; border: var(--border); border-radius: 25px; padding: 25px; width: 100%; max-width: 320px; text-align: center; box-shadow: 8px 8px 0px var(--ink-black); }
     </style>
 </head>
 <body id="body-bg">
@@ -156,7 +152,6 @@
         <div id="lb-list" style="background: white; border: var(--border); border-radius: 15px; flex: 1; overflow-y: auto; padding: 10px; margin: 10px 0;"></div>
         <button class="num-key" onclick="showScreen('screen-menu')" style="width:100%; background: var(--doodle-yellow);">KEMBALI</button>
     </div>
-
 </div>
 
 <div id="modal-res" class="modal">
@@ -164,7 +159,10 @@
         <h2 id="modal-title">Hebat!</h2>
         <div id="modal-score" style="font-size: 2.8rem; color: var(--doodle-blue); font-weight: 800; margin: 15px 0;">500</div>
         <p id="modal-msg" style="font-weight: 600; margin-bottom: 20px;">Kamu menyelesaikan Stage!</p>
-        <button class="num-key" id="modal-btn" onclick="handleModal()" style="width: 100%; background: var(--doodle-green); color:white;">LANJUT</button>
+        
+        <button class="num-key btn-modal" style="background: var(--doodle-green); color:white;" onclick="handleModalAction('next')">LANJUT</button>
+        <button class="num-key btn-modal" style="background: var(--doodle-yellow);" onclick="handleModalAction('retry')">ULANGI</button>
+        <button class="num-key btn-modal" style="background: #ff7675; color:white;" onclick="handleModalAction('menu')">MENU UTAMA</button>
     </div>
 </div>
 
@@ -259,11 +257,19 @@
         document.getElementById('modal-res').style.display = 'flex';
     }
 
-    function handleModal() {
+    // IMPROVISASI: Logika Tombol di Modal
+    function handleModalAction(action) {
         document.getElementById('modal-res').style.display = 'none';
-        state.stage++; state.level = 1;
-        document.getElementById('hud-stage').innerText = `Stage ${state.stage}`;
-        newQ();
+        if(action === 'next') {
+            state.stage++; state.level = 1;
+            document.getElementById('hud-stage').innerText = `Stage ${state.stage}`;
+            newQ();
+        } else if(action === 'retry') {
+            state.level = 1;
+            newQ();
+        } else if(action === 'menu') {
+            location.reload();
+        }
     }
 
     function saveLB() {
@@ -285,6 +291,25 @@
     }
 
     function confirmQuit() { if(confirm("Keluar game?")) location.reload(); }
+
+    // IMPROVISASI: Input Keyboard
+    document.addEventListener('keydown', (e) => {
+        if(!state.isPlaying) return;
+        
+        // Cek jika yang ditekan adalah angka 0-9
+        if(e.key >= '0' && e.key <= '9') {
+            pressNum(e.key);
+        } 
+        // Cek jika Enter untuk OK
+        else if(e.key === 'Enter') {
+            checkAnswer();
+        } 
+        // Cek jika Backspace untuk Clear
+        else if(e.key === 'Backspace') {
+            pressClear();
+        }
+    });
+
 </script>
 </body>
 </html>
