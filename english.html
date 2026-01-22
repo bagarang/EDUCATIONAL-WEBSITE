@@ -63,12 +63,17 @@
         #question-area { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 0; padding: 10px 0; }
 
         .img-box {
-            width: 100%; max-height: 40vh;
+            width: 100%; height: 220px;
             border: 3px solid var(--border-color); border-radius: 20px;
             overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.05);
             background: #fff; margin-bottom: 15px;
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
         }
         .img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        
+        /* Gaya untuk fallback Emoji jika gambar error */
+        .emoji-fallback { font-size: 8rem; display: none; }
 
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
         .option-btn {
@@ -87,9 +92,6 @@
 
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
         .modal-box { background: white; padding: 25px; border-radius: 25px; border: 3px solid var(--border-color); text-align: center; width: 85%; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -108,8 +110,8 @@
             <div id="menu-screen" class="screen active">
                 <h1 style="margin-top: 10px;">English Fun! 🦁🚀</h1>
                 <div id="question-area">
-                    <div class="img-box" style="max-height: 25vh;">
-                        <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?auto=format&fit=crop&w=500&q=80" alt="Lion">
+                    <div class="img-box">
+                        <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=500" alt="Intro">
                     </div>
                     <input type="text" id="player-name" placeholder="Siapa namamu?" maxlength="12" 
                            style="width:100%; padding:12px; border:2px dashed #333; border-radius:12px; text-align:center; font-family:inherit; margin-bottom:10px;">
@@ -121,27 +123,29 @@
 
             <div id="game-screen" class="screen">
                 <div id="question-area">
-                    <div id="q-img-container" class="img-box"></div>
+                    <div id="q-img-container" class="img-box">
+                        <img id="main-img" src="" alt="Question">
+                        <div id="emoji-placeholder" class="emoji-fallback"></div>
+                    </div>
                     <div id="options-container" class="options-grid"></div>
                 </div>
             </div>
 
             <div id="leaderboard-screen" class="screen">
                 <h1>TOP TRAVELERS</h1>
-                <div style="flex:1; overflow-y:auto;">
-                    <table>
-                        <thead><tr><th>Rank</th><th>Name</th><th>Score</th></tr></thead>
+                <div id="lb-content" style="flex:1; overflow-y:auto; background:white; border:2px solid #333; border-radius:12px; margin-bottom:15px; width:100%;">
+                    <table style="width:100%; border-collapse:collapse;">
                         <tbody id="lb-body"></tbody>
                     </table>
                 </div>
-                <button class="btn btn-blue" onclick="switchScreen('menu-screen')">KE MENU UTAMA</button>
+                <button class="btn btn-blue" onclick="switchScreen('menu-screen')">KE MENU</button>
             </div>
         </div>
 
         <div id="modal" class="modal-overlay">
             <div class="modal-box">
                 <div id="modal-icon" style="font-size: 3rem;">🎉</div>
-                <h2 id="modal-text" style="margin: 10px 0;">Correct!</h2>
+                <h2 id="modal-text">Correct!</h2>
                 <div id="modal-score-change" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;">+100</div>
                 <div id="modal-actions"></div>
             </div>
@@ -149,45 +153,37 @@
     </div>
 
     <script>
-        // Database gambar yang sudah dipastikan aktif
+        // Data Soal dengan Link Lebih Stabil (Source Unsplash ID) & Emoji Fallback
         const categories = {
             animals: [
-                { word: "Lion", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=500&q=80", opts: ["Lion", "Tiger", "Cat", "Dog"] },
-                { word: "Elephant", img: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=500&q=80", opts: ["Elephant", "Pig", "Cow", "Hippo"] },
-                { word: "Giraffe", img: "https://images.unsplash.com/photo-1545910600-28011da80c8e?auto=format&fit=crop&w=500&q=80", opts: ["Giraffe", "Zebra", "Horse", "Deer"] },
-                { word: "Cat", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=500&q=80", opts: ["Cat", "Rabbit", "Mouse", "Hamster"] },
-                { word: "Tiger", img: "https://images.unsplash.com/photo-1508061214084-1df7042c13ee?auto=format&fit=crop&w=500&q=80", opts: ["Tiger", "Lion", "Leopard", "Wolf"] },
-                { word: "Zebra", img: "https://images.unsplash.com/photo-1526081347589-7fa3cb41b4b2?auto=format&fit=crop&w=500&q=80", opts: ["Zebra", "Donkey", "Horse", "Cow"] },
-                { word: "Monkey", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?auto=format&fit=crop&w=500&q=80", opts: ["Monkey", "Gorilla", "Sloth", "Human"] },
-                { word: "Rabbit", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=500&q=80", opts: ["Rabbit", "Squirrel", "Rat", "Cat"] },
-                { word: "Panda", img: "https://images.unsplash.com/photo-1564349683136-77e08bef1ed1?auto=format&fit=crop&w=500&q=80", opts: ["Panda", "Koala", "Bear", "Sloth"] },
-                { word: "Dog", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80", opts: ["Dog", "Wolf", "Fox", "Hyena"] }
+                { word: "Lion", emoji: "🦁", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=500", opts: ["Lion", "Tiger", "Cat", "Dog"] },
+                { word: "Elephant", emoji: "🐘", img: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=500", opts: ["Elephant", "Pig", "Cow", "Hippo"] },
+                { word: "Giraffe", emoji: "🦒", img: "https://images.unsplash.com/photo-1545910600-28011da80c8e?w=500", opts: ["Giraffe", "Zebra", "Horse", "Deer"] },
+                { word: "Cat", emoji: "🐱", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500", opts: ["Cat", "Rabbit", "Mouse", "Hamster"] },
+                { word: "Tiger", emoji: "🐯", img: "https://images.unsplash.com/photo-1508061214084-1df7042c13ee?w=500", opts: ["Tiger", "Lion", "Leopard", "Wolf"] },
+                { word: "Monkey", emoji: "🐒", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=500", opts: ["Monkey", "Gorilla", "Sloth", "Bear"] },
+                { word: "Panda", emoji: "🐼", img: "https://images.unsplash.com/photo-1564349683136-77e08bef1ed1?w=500", opts: ["Panda", "Koala", "Bear", "Dog"] },
+                { word: "Rabbit", emoji: "🐰", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=500", opts: ["Rabbit", "Squirrel", "Rat", "Cat"] }
             ],
             vehicles: [
-                { word: "Airplane", img: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?auto=format&fit=crop&w=500&q=80", opts: ["Airplane", "Helicopter", "Rocket", "Bird"] },
-                { word: "Submarine", img: "https://images.unsplash.com/photo-1516750105099-4b8a83e217ee?auto=format&fit=crop&w=500&q=80", opts: ["Submarine", "Boat", "Fish", "Ship"] },
-                { word: "Bicycle", img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=500&q=80", opts: ["Bicycle", "Motorcycle", "Car", "Scooter"] },
-                { word: "Train", img: "https://images.unsplash.com/photo-1474487056235-91642f4b3bb5?auto=format&fit=crop&w=500&q=80", opts: ["Train", "Subway", "Bus", "Tram"] },
-                { word: "Bus", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=500&q=80", opts: ["Bus", "Truck", "Van", "Car"] },
-                { word: "Ship", img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80", opts: ["Ship", "Boat", "Yacht", "Canoe"] },
-                { word: "Rocket", img: "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=500&q=80", opts: ["Rocket", "Plane", "Star", "Alien"] },
-                { word: "Car", img: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=500&q=80", opts: ["Car", "Truck", "Jeep", "Taxi"] }
+                { word: "Airplane", emoji: "✈️", img: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?w=500", opts: ["Airplane", "Rocket", "Helicopter", "Bus"] },
+                { word: "Bicycle", emoji: "🚲", img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=500", opts: ["Bicycle", "Motorcycle", "Car", "Train"] },
+                { word: "Train", emoji: "🚆", img: "https://images.unsplash.com/photo-1474487056235-91642f4b3bb5?w=500", opts: ["Train", "Subway", "Bus", "Tram"] },
+                { word: "Bus", emoji: "🚌", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=500", opts: ["Bus", "Truck", "Van", "Taxi"] },
+                { word: "Ship", emoji: "🚢", img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500", opts: ["Ship", "Boat", "Submarine", "Rocket"] },
+                { word: "Rocket", emoji: "🚀", img: "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=500", opts: ["Rocket", "Plane", "Satellite", "Alien"] },
+                { word: "Car", emoji: "🚗", img: "https://images.unsplash.com/photo-1494905998402-395d579af36f?w=500", opts: ["Car", "Truck", "Jeep", "Bicycle"] }
             ],
             objects: [
-                { word: "Pizza", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80", opts: ["Pizza", "Bread", "Cake", "Cookie"] },
-                { word: "Laptop", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&q=80", opts: ["Laptop", "Tablet", "Monitor", "Keyboard"] },
-                { word: "Guitar", img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=500&q=80", opts: ["Guitar", "Piano", "Violin", "Drum"] },
-                { word: "Camera", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=500&q=80", opts: ["Camera", "Phone", "Watch", "TV"] },
-                { word: "Burger", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80", opts: ["Burger", "Pizza", "Taco", "Sandwich"] },
-                { word: "Cake", img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=500&q=80", opts: ["Cake", "Bread", "Donut", "Muffin"] }
+                { word: "Pizza", emoji: "🍕", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500", opts: ["Pizza", "Bread", "Cake", "Burger"] },
+                { word: "Laptop", emoji: "💻", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500", opts: ["Laptop", "Tablet", "Phone", "TV"] },
+                { word: "Camera", emoji: "📷", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500", opts: ["Camera", "Phone", "Watch", "Laptop"] },
+                { word: "Burger", emoji: "🍔", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500", opts: ["Burger", "Pizza", "Taco", "Sushi"] },
+                { word: "Guitar", emoji: "🎸", img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=500", opts: ["Guitar", "Piano", "Violin", "Drum"] }
             ]
         };
 
-        let state = { 
-            score: 0, stage: 1, level: 1, timer: 15, timerInterval: null, 
-            currentQuestion: null, isProcessing: false, playerName: "",
-            questionPool: [] 
-        };
+        let state = { score: 0, stage: 1, level: 1, timer: 15, timerInterval: null, currentQuestion: null, isProcessing: false, playerName: "", questionPool: [] };
 
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -202,9 +198,7 @@
             const n = document.getElementById('player-name').value.trim();
             if(!n) return alert("Masukkan namamu!");
             state.playerName = n; state.score = 0; state.stage = 1; state.level = 1;
-            switchScreen('game-screen'); 
-            preparePool(); 
-            loadQuestion();
+            switchScreen('game-screen'); preparePool(); loadQuestion();
         }
 
         function preparePool() {
@@ -220,16 +214,27 @@
             document.getElementById('score-display').innerText = state.score;
             document.getElementById('stage-display').innerText = `Stage ${state.stage}-${state.level}`;
             
-            const imgC = document.getElementById('q-img-container');
+            const imgElement = document.getElementById('main-img');
+            const emojiPlaceholder = document.getElementById('emoji-placeholder');
             const optC = document.getElementById('options-container');
 
             if (state.questionPool.length === 0) preparePool();
             const data = state.questionPool.shift(); 
+            state.currentQuestion = data;
             
-            state.currentQuestion = { ans: data.word };
-            imgC.innerHTML = `<img src="${data.img}" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">`;
+            // Reset Tampilan Gambar
+            imgElement.style.display = "block";
+            emojiPlaceholder.style.display = "none";
+            imgElement.src = data.img;
+            
+            // Logika JIKA gambar gagal dimuat
+            imgElement.onerror = function() {
+                this.style.display = "none";
+                emojiPlaceholder.style.display = "block";
+                emojiPlaceholder.innerText = data.emoji;
+            };
+
             optC.innerHTML = "";
-            
             shuffle([...data.opts]).forEach(o => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn'; btn.innerText = o;
@@ -255,8 +260,7 @@
         function checkAnswer(user) {
             if (state.isProcessing) return;
             state.isProcessing = true; clearInterval(state.timerInterval);
-
-            const isCorrect = user === state.currentQuestion.ans;
+            const isCorrect = user === state.currentQuestion.word;
             if (isCorrect) {
                 state.score += 100;
                 showModal("YES! CORRECT", "🌟", 100, state.level < 5 ? "next" : "clear");
@@ -273,7 +277,6 @@
             const sc = document.getElementById('modal-score-change');
             sc.innerText = (change > 0 ? "+" : "") + change;
             sc.style.color = change > 0 ? "var(--accent)" : "red";
-
             const acts = document.getElementById('modal-actions');
             acts.innerHTML = "";
 
@@ -285,10 +288,10 @@
                 addBtn(acts, "NEXT STAGE", () => { 
                     closeModal(); 
                     if(state.stage < 20) { state.stage++; state.level = 1; preparePool(); loadQuestion(); }
-                    else { alert("GAME SELESAI!"); saveLB(); switchScreen('menu-screen'); }
+                    else { alert("GAME COMPLETED!"); saveLB(); location.reload(); }
                 }, "btn-green");
-                addBtn(acts, "RETRY STAGE", () => { closeModal(); state.level = 1; loadQuestion(); }, "btn-blue");
-                addBtn(acts, "MAIN MENU", () => { closeModal(); saveLB(); location.reload(); }, "btn-red");
+                addBtn(acts, "RETRY STAGE", () => { closeModal(); state.level = 1; preparePool(); loadQuestion(); }, "btn-blue");
+                addBtn(acts, "MAIN MENU", () => { location.reload(); }, "btn-red");
             }
             m.style.display = "flex";
         }
@@ -302,16 +305,16 @@
         function closeModal() { document.getElementById('modal').style.display = "none"; }
 
         function saveLB() {
-            let data = JSON.parse(localStorage.getItem('discovery_pro_lb')) || [];
+            let data = JSON.parse(localStorage.getItem('english_kids_lb')) || [];
             data.push({ name: state.playerName, score: state.score });
             data.sort((a,b) => b.score - a.score);
-            localStorage.setItem('discovery_pro_lb', JSON.stringify(data.slice(0,10)));
+            localStorage.setItem('english_kids_lb', JSON.stringify(data.slice(0,10)));
         }
 
         function showLeaderboard() {
             const body = document.getElementById('lb-body');
-            const data = JSON.parse(localStorage.getItem('discovery_pro_lb')) || [];
-            body.innerHTML = data.map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center">Belum ada data</td></tr>';
+            const data = JSON.parse(localStorage.getItem('english_kids_lb')) || [];
+            body.innerHTML = data.map((d, i) => `<tr><td style='padding:10px'>#${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`).join('') || "<tr><td colspan='3' style='padding:20px;text-align:center'>No data yet</td></tr>";
             switchScreen('leaderboard-screen');
         }
 
