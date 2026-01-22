@@ -1,278 +1,889 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>IPTV Sci-Fi Command Center</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENGLISH IS FUN - SD Travel Edition</title>
+    
+    <!-- Import Font Gaya Tulisan Tangan (Doodle Style) -->
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A90E2; /* Langit Biru */
+            --secondary-color: #F5A623; *//* Matahari Kuning */
+            --accent-color: #7ED321; /* Rumput Hijau */
+            --paper-color: #FDFBF7;
+            --doodle-border: 2px solid #333;
+            --shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            --font-main: 'Patrick Hand', cursive;
+            --font-bold: 'Comic Neue', cursive;
+        }
 
-<style>
-:root {
-  --neon-cyan: #00f2ff;
-  --neon-blue: #0066ff;
-  --dark-bg: #050a10;
-  --glass-bg: rgba(10, 25, 41, 0.8);
-}
+        * {
+            box-sizing: border-box;
+            user-select: none; /* Mencegah seleksi teks agar terasa seperti app */
+        }
 
-body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  background-color: var(--dark-bg);
-  /* Background grid efek Sci-Fi */
-  background-image: 
-    linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-  background-size: 30px 30px;
-  color: #e0faff;
-  font-family: 'Roboto Mono', monospace;
-  overflow: hidden;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background-color: #E0F7FA;
+            background-image: 
+                radial-gradient(#B2EBF2 15%, transparent 16%),
+                radial-gradient(#B2EBF2 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-/* --- SIDEBAR SCI-FI --- */
-#sidebar {
-  width: 350px;
-  display: flex;
-  flex-direction: column;
-  background: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  border-right: 1px solid var(--neon-blue);
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
-  z-index: 10;
-}
+        /* Container Utama dengan gaya "Travel Journal" */
+        #game-container {
+            width: 90%;
+            max-width: 600px;
+            height: 90vh;
+            background-color: var(--paper-color);
+            border: var(--doodle-border);
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; /* Bentuk organik */
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+        }
 
-#search, #category {
-  padding: 12px;
-  margin: 15px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--neon-blue);
-  color: var(--neon-cyan);
-  outline: none;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+        /* Hiasan Doodle CSS */
+        .doodle-tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            transform: translateX(-50%) rotate(-2deg);
+        }
 
-#search::placeholder {
-  color: rgba(0, 242, 255, 0.4);
-}
+        /* Layar (Screens) */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
 
-#search:focus, #category:focus {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-}
+        .screen.active {
+            display: flex;
+        }
 
-#playlist {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
-/* Scrollbar Style */
-#playlist::-webkit-scrollbar {
-  width: 5px;
-}
-#playlist::-webkit-scrollbar-thumb {
-  background: var(--neon-blue);
-}
+        /* Tipografi & Elemen UI */
+        h1 {
+            font-family: var(--font-bold);
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0px #fff, 4px 4px 0px #000;
+            letter-spacing: 2px;
+        }
 
-.channel {
-  padding: 12px 15px;
-  margin-bottom: 5px;
-  border-left: 3px solid transparent;
-  background: rgba(255, 255, 255, 0.03);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 13px;
-}
+        h2 {
+            font-family: var(--font-bold);
+            color: #333;
+            margin: 10px 0;
+        }
 
-.channel:hover {
-  background: rgba(0, 242, 255, 0.1);
-  border-left-color: var(--neon-cyan);
-  padding-left: 20px;
-  color: var(--neon-cyan);
-}
+        .input-group {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
 
-/* --- PLAYER AREA --- */
-#player {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  background: radial-gradient(circle, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
-}
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-family: var(--font-main);
+            border: 2px dashed #999;
+            border-radius: 10px;
+            background: #fff;
+            outline: none;
+            text-align: center;
+            transition: 0.3s;
+        }
 
-.video-frame {
-  position: relative;
-  width: 90%;
-  padding: 10px;
-  border: 1px solid rgba(0, 242, 255, 0.2);
-  background: rgba(0, 0, 0, 0.8);
-}
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            background-color: #EAF6FF;
+        }
 
-/* Sudut Dekoratif Sci-Fi */
-.video-frame::before, .video-frame::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--neon-cyan);
-}
-.video-frame::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-.video-frame::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+        /* Tombol */
+        .btn {
+            display: block;
+            width: 200px;
+            padding: 12px 20px;
+            margin: 10px auto;
+            font-family: var(--font-bold);
+            font-size: 1.2rem;
+            color: white;
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #D35400;
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-decoration: none;
+        }
 
-video {
-  width: 100%;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 1);
-}
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #D35400;
+        }
 
-/* --- TOMBOL KEMBALI --- */
-.back-to-index {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  padding: 12px 20px;
-  background: rgba(0, 102, 255, 0.15);
-  color: var(--neon-cyan);
-  text-decoration: none;
-  border: 1px solid var(--neon-blue);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  z-index: 1000;
-  transition: all 0.3s;
-  backdrop-filter: blur(5px);
-  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
-}
+        .btn-green { background-color: var(--accent-color); box-shadow: 0 4px 0 #5CAD00; }
+        .btn-blue { background-color: var(--primary-color); box-shadow: 0 4px 0 #2C3E50; }
+        .btn-red { background-color: #FF6B6B; box-shadow: 0 4px 0 #C0392B; }
+        .btn-small { width: auto; font-size: 1rem; padding: 8px 16px; display: inline-block; margin: 5px; }
 
-.back-to-index:hover {
-  background: var(--neon-blue);
-  color: white;
-  box-shadow: 0 0 20px var(--neon-blue);
-  transform: translateY(-2px);
-}
-</style>
+        /* Elemen Game (Soal & Timer) */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .timer-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .question-image {
+            font-size: 6rem; /* Menggunakan Emoji sebagai gambar utama */
+            margin: 20px 0;
+            filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.2));
+            animation: bounce 2s infinite;
+        }
+
+        .question-image img {
+            max-width: 100%;
+            border-radius: 15px;
+            border: 3px solid #333;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: var(--font-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #ccc;
+            transition: 0.2s;
+        }
+
+        .option-btn:hover {
+            background: #f0f0f0;
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px #ccc;
+        }
+
+        /* Leaderboard Style */
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .leaderboard-item:nth-child(1) { background-color: #FFD700; } /* Gold */
+        .leaderboard-item:nth-child(2) { background-color: #C0C0C0; } /* Silver */
+        .leaderboard-item:nth-child(3) { background-color: #CD7F32; } /* Bronze */
+
+        /* Modal / Popup Overlay */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #333;
+            text-align: center;
+            max-width: 80%;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .feedback-text {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .correct { color: var(--accent-color); }
+        .wrong { color: #FF6B6B; }
+
+        /* Pesan Stage Selesai */
+        .stage-complete-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer */
+        .footer-nav {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+    </style>
 </head>
-
 <body>
 
-<div id="sidebar">
-  <div style="padding: 20px; text-align: center; border-bottom: 1px solid var(--neon-blue);">
-    <h2 style="font-family: 'Orbitron', sans-serif; margin: 0; font-size: 18px; color: var(--neon-cyan);">COMMAND HUB</h2>
-    <small style="font-size: 9px; opacity: 0.6;">SYSTEM STATUS: ONLINE</small>
-  </div>
-  <input id="search" type="text" placeholder="Scan Frequency...">
-  <select id="category">
-    <option value="all">ALL FREQUENCIES</option>
-  </select>
-  <div id="playlist"></div>
-</div>
+    <div id="game-container">
+        <!-- Pita Hiasan -->
+        <div class="doodle-tape"></div>
 
-<div id="player">
-  <div class="video-frame">
-    <video id="video" controls></video>
-  </div>
-</div>
+        <!-- ================= MAIN MENU ================= -->
+        <div id="menu-screen" class="screen active">
+            <h1>ENGLISH IS FUN</h1>
+            <div class="question-image">✈️ 🗺️ 🌍</div>
+            
+            <div class="input-group">
+                <input type="text" id="player-name" placeholder="Masukkan Nama Kamu..." maxlength="15">
+            </div>
 
-<a href="index.html" class="back-to-index">
-  [ BACK_TO_BASE ]
-</a>
+            <button class="btn btn-blue" onclick="startGame()">START</button>
+            <button class="btn btn-green" onclick="showLeaderboard()">LEADERBOARD</button>
+            
+            <div class="footer-nav">
+                <button class="btn btn-red btn-small" onclick="goToIndex()">KEMBALI</button>
+            </div>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script>
-// --- LOGIKANYA TETAP SAMA ---
-const M3U_URL = 'https://iptv-org.github.io/iptv/index.category.m3u';
+        <!-- ================= GAME PLAY SCREEN ================= -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <span id="score-display">Score: 0</span>
+                <span id="stage-display">Stage 1 - 1</span>
+            </div>
+            
+            <div class="timer-bar-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
 
-const playlistDiv = document.getElementById('playlist');
-const searchInput = document.getElementById('search');
-const categorySelect = document.getElementById('category');
-const video = document.getElementById('video');
+            <!-- Area Konten Soal (Berubah sesuai tipe) -->
+            <div id="question-area">
+                <!-- Image Placeholder -->
+                <div id="q-image-container" class="question-image"></div>
+                
+                <!-- Opsi Jawaban (Stage 1-15) -->
+                <div id="options-container" class="options-grid"></div>
 
-let channels = [];
-let hls;
+                <!-- Input Teks (Stage 16-20) -->
+                <div id="input-container" style="display: none;">
+                    <input type="text" id="answer-input" placeholder="Ketik jawaban dalam bahasa Inggris..." autocomplete="off">
+                    <button class="btn btn-green" style="margin-top:10px" onclick="submitTextAnswer()">Submit</button>
+                </div>
+            </div>
+        </div>
 
-fetch(M3U_URL)
-  .then(res => res.text())
-  .then(text => parseM3U(text));
+        <!-- ================= LEADERBOARD SCREEN ================= -->
+        <div id="leaderboard-screen" class="screen">
+            <h2>🏆 TOP TRAVELERS 🏆</h2>
+            <ul id="leaderboard-list" class="leaderboard-list">
+                <!-- List Item injected by JS -->
+            </ul>
+            <button class="btn btn-blue" onclick="showMenu()">BACK TO MENU</button>
+        </div>
 
-function parseM3U(text) {
-  const lines = text.split('\n');
-  let current = {};
+        <!-- ================= MODAL FEEDBACK (Benar/Salah/Stage End) ================= -->
+        <div id="modal" class="modal-overlay">
+            <div class="modal-content">
+                <div id="modal-icon" style="font-size: 4rem;">🎉</div>
+                <div id="modal-text" class="feedback-text">Correct!</div>
+                <div id="modal-score-change" style="font-size: 1.2rem; margin-bottom: 20px;">+100</div>
+                
+                <div id="modal-actions">
+                    <!-- Tombol dinamis akan disini -->
+                </div>
+            </div>
+        </div>
 
-  lines.forEach(line => {
-    line = line.trim();
-    if (line.startsWith('#EXTINF')) {
-      current = {};
-      current.name = line.split(',').pop();
-      const group = line.match(/group-title="(.*?)"/);
-      current.category = group ? group[1] : 'Other';
-    } else if (line.startsWith('http')) {
-      current.url = line;
-      channels.push(current);
-    }
-  });
+    </div>
 
-  buildCategories();
-  renderChannels();
-}
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // ================= DATA SOAL =================
+        // Kita menggunakan Emoji dan data sederhana untuk memastikan game stabil tanpa load gambar eksternal yang lambat/bermasalah.
+        // Tema: Travel & Objects
 
-function buildCategories() {
-  const cats = new Set(channels.map(c => c.category));
-  cats.forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat.toUpperCase();
-    categorySelect.appendChild(opt);
-  });
-}
+        const vocabObjects = [
+            { word: "Airplane", emoji: "✈️", opts: ["Airplane", "Bird", "Car", "Train"] },
+            { word: "Map", emoji: "🗺️", opts: ["Map", "Paper", "Book", "Ball"] },
+            { word: "Backpack", emoji: "🎒", opts: ["Backpack", "Shoe", "Hat", "Bag"] },
+            { word: "Camera", emoji: "📷", opts: ["Camera", "Phone", "Glass", "Watch"] },
+            { word: "Passport", emoji: "📘", opts: ["Passport", "Comic", "Note", "Money"] },
+            { word: "Ticket", emoji: "🎫", opts: ["Ticket", "Money", "Card", "Leaf"] },
+            { word: "Suitcase", emoji: "🧳", opts: ["Suitcase", "Box", "House", "Table"] },
+            { word: "Boat", emoji: "⛵", opts: ["Boat", "Bike", "Car", "Plane"] },
+            { word: "Mountain", emoji: "🏔️", opts: ["Mountain", "Hill", "Stone", "Wall"] },
+            { word: "Beach", emoji: "🏖️", opts: ["Beach", "Park", "Pool", "Snow"] },
+            { word: "Hotel", emoji: "🏨", opts: ["Hotel", "House", "School", "Hospital"] },
+            { word: "Sun", emoji: "☀️", opts: ["Sun", "Moon", "Star", "Lamp"] },
+            { word: "Bus", emoji: "🚌", opts: ["Bus", "Car", "Train", "Truck"] },
+            { word: "Money", emoji: "💵", opts: ["Money", "Paper", "Letter", "Cloth"] },
+            { word: "Compass", emoji: "🧭", opts: ["Compass", "Clock", "Watch", "Circle"] },
+            { word: "Glasses", emoji: "🕶️", opts: ["Glasses", "Eyes", "Window", "Sun"] }
+        ];
 
-function renderChannels() {
-  playlistDiv.innerHTML = '';
-  const keyword = searchInput.value.toLowerCase();
-  const selectedCat = categorySelect.value;
+        const vocabActions = [
+            { word: "Swim", emoji: "🏊", opts: ["Swim", "Run", "Jump", "Fly"] },
+            { word: "Run", emoji: "🏃", opts: ["Run", "Walk", "Sit", "Sleep"] },
+            { word: "Eat", emoji: "🍽️", opts: ["Eat", "Cook", "Clean", "Drink"] },
+            { word: "Sleep", emoji: "🛌", opts: ["Sleep", "Stand", "Fight", "Dance"] },
+            { word: "Drive", emoji: "🚗", opts: ["Drive", "Walk", "Ride", "Fly"] },
+            { word: "Read", emoji: "📖", opts: ["Read", "Write", "Draw", "Listen"] },
+            { word: "Take Photo", emoji: "📸", opts: ["Take Photo", "See", "Look", "Watch"] },
+            { word: "Fly", emoji: "🦅", opts: ["Fly", "Swim", "Crawl", "Walk"] },
+            { word: "Buy", emoji: "🛍️", opts: ["Buy", "Sell", "Give", "Take"] },
+            { word: "Listen", emoji: "🎧", opts: ["Listen", "Speak", "Shout", "Sing"] },
+            { word: "Climb", emoji: "🧗", opts: ["Climb", "Fall", "Jump", "Slide"] },
+            { word: "Explore", emoji: "🔭", opts: ["Explore", "Ignore", "Hide", "Stay"] }
+        ];
 
-  channels
-    .filter(c =>
-      (selectedCat === 'all' || c.category === selectedCat) &&
-      c.name.toLowerCase().includes(keyword)
-    )
-    .forEach(c => {
-      const div = document.createElement('div');
-      div.className = 'channel';
-      div.textContent = `> ${c.name.toUpperCase()}`;
-      div.onclick = () => playStream(c.url);
-      playlistDiv.appendChild(div);
-    });
-}
+        const sentences = [
+            { q: "👨‍👩‍👧‍👦 ✈️ 🗼", a: ["family goes to japan", "the family is flying"], hint: "Family is travelling" },
+            { q: "🏊‍♂️ 🌊 🐠", a: ["he swims in the sea", "swimming in the ocean"], hint: "Activity in water" },
+            { q: "📸 🦁 🦁", a: ["taking photo of lions", "photo a lion"], hint: "Camera action" },
+            { q: "🍕 🍕 😋", a: ["eating pizza", "they eat pizza"], hint: "Food consumption" },
+            { q: "📚 🏫 🎒", a: ["study at school", "reading books"], hint: "School activity" },
+            { q: "🏔️ ❄️ 🥶", a: ["cold mountain", "it is snowing"], hint: "Weather condition" },
+            { q: "🚌 🛣️ 🏙️", a: ["bus in the city", "driving bus"], hint: "Transport in city" },
+            { q: "🌙 🛌 💤", a: ["sleep at night", "go to sleep"], hint: "Night time" },
+            { q: "🎸 🎵 👂", a: ["playing guitar", "listen to music"], hint: "Music instrument" },
+            { q: "☕ 📱 💬", a: "drinking coffee", hint: "Relaxing" }
+        ];
 
-function playStream(url) {
-  if (hls) {
-    hls.destroy();
-    hls = null;
-  }
+        // ================= GAME VARIABLES =================
+        let state = {
+            screen: 'menu',
+            playerName: '',
+            score: 0,
+            stage: 1,
+            level: 1, // 1-5
+            timer: 15,
+            timerInterval: null,
+            currentQuestion: null,
+            isProcessing: false // prevent double clicks
+        };
 
-  if (Hls.isSupported()) {
-    hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
-  }
-  video.play();
-}
+        const TOTAL_STAGES = 20;
+        const LEVELS_PER_STAGE = 5;
 
-searchInput.addEventListener('input', renderChannels);
-categorySelect.addEventListener('change', renderChannels);
-</script>
+        // ================= AUDIO ENGINE (Web Audio API) =================
+        // Membuat musik monotone easy listening tanpa file eksternal
+        let audioCtx;
+        let isMusicPlaying = false;
+        let nextNoteTime = 0;
+        let noteIndex = 0;
+        
+        // Skala nada C Major Pentatonic (C, D, E, G, A)
+        const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; 
 
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine'; // Monotone lembut
+            osc.frequency.value = freq;
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            
+            // Envelope ADSR sederhana agar tidak 'klik'
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.1); // Attack
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); // Release
+            
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function scheduler() {
+            if (!isMusicPlaying) return;
+            
+            // Mainkan loop notanya pelan-pelan
+            if (nextNoteTime <= audioCtx.currentTime + 0.1) {
+                playTone(notes[noteIndex], 2); // Nada panjang 2 detik
+                noteIndex = (noteIndex + 1) % notes.length;
+                nextNoteTime = audioCtx.currentTime + 1.5; // Jarak antar nada (slow tempo)
+            }
+            window.requestAnimationFrame(scheduler);
+        }
+
+        function startMusic() {
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            isMusicPlaying = true;
+            nextNoteTime = audioCtx.currentTime;
+            scheduler();
+        }
+
+        function stopMusic() {
+            isMusicPlaying = false;
+        }
+
+        function playSoundEffect(type) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                // Ting! (High C -> E)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                // Buzz (Low Gb)
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(185.00, now); // F#
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.02, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+
+        // ================= GAME LOGIC =================
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            playSoundEffect('click');
+        }
+
+        function goToIndex() {
+            window.location.href = 'index.html';
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('player-name');
+            if (nameInput.value.trim() === "") {
+                // Input shake animation sederhana
+                nameInput.style.borderColor = "red";
+                setTimeout(() => nameInput.style.borderColor = "#999", 500);
+                return;
+            }
+
+            state.playerName = nameInput.value;
+            state.score = 0;
+            state.stage = 1;
+            state.level = 1;
+            
+            startMusic(); // Mulai musik easy listening
+            loadStage();
+            switchScreen('game-screen');
+        }
+
+        function loadStage() {
+            state.isProcessing = false;
+            document.getElementById('score-display').innerText = `Score: ${state.score}`;
+            document.getElementById('stage-display').innerText = `Stage ${state.stage} - Level ${state.level}`;
+            document.getElementById('answer-input').value = ""; // Reset input
+            
+            // Setup UI berdasarkan Stage
+            const imgContainer = document.getElementById('q-image-container');
+            const optContainer = document.getElementById('options-container');
+            const inputContainer = document.getElementById('input-container');
+
+            optContainer.innerHTML = '';
+            optContainer.style.display = 'grid';
+            inputContainer.style.display = 'none';
+
+            // Logika Generate Soal
+            if (state.stage <= 8) {
+                // Stage 1-8: Objects (Pilihan Ganda)
+                const qData = vocabObjects[Math.floor(Math.random() * vocabObjects.length)];
+                state.currentQuestion = { type: 'choice', answer: qData.word, options: qData.opts };
+                imgContainer.innerText = qData.emoji;
+                
+                qData.opts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkAnswer(opt);
+                    optContainer.appendChild(btn);
+                });
+
+            } else if (state.stage <= 15) {
+                // Stage 9-15: Actions (Pilihan Ganda)
+                const qData = vocabActions[Math.floor(Math.random() * vocabActions.length)];
+                state.currentQuestion = { type: 'choice', answer: qData.word, options: qData.opts };
+                imgContainer.innerText = qData.emoji;
+
+                qData.opts.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = opt;
+                    btn.onclick = () => checkAnswer(opt);
+                    optContainer.appendChild(btn);
+                });
+
+            } else {
+                // Stage 16-20: Sentences (Input Teks)
+                // Kita ambil data sentence secara random atau looping
+                const qIndex = (state.stage + state.level) % sentences.length;
+                const qData = sentences[qIndex];
+                state.currentQuestion = { 
+                    type: 'text', 
+                    answers: qData.a, // array of accepted answers
+                    hint: qData.hint
+                };
+                
+                imgContainer.innerText = qData.q;
+                imgContainer.style.fontSize = "4rem"; // Sedikit lebih kecil untuk scene
+                optContainer.style.display = 'none';
+                inputContainer.style.display = 'block';
+                
+                // Hint kecil
+                const hintEl = document.createElement('div');
+                hintEl.id = 'hint-text';
+                hintEl.style.color = '#888';
+                hintEl.style.marginBottom = '5px';
+                hintEl.innerText = `Hint: ${state.currentQuestion.hint}`;
+                inputContainer.insertBefore(hintEl, document.getElementById('answer-input'));
+            }
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            state.timer = 15;
+            const bar = document.getElementById('timer-bar');
+            bar.style.width = '100%';
+            bar.style.backgroundColor = '#7ED321';
+
+            state.timerInterval = setInterval(() => {
+                state.timer--;
+                const percentage = (state.timer / 15) * 100;
+                bar.style.width = percentage + '%';
+
+                // Warna berubah saat waktu menipis
+                if (state.timer < 5) bar.style.backgroundColor = '#FF6B6B';
+
+                if (state.timer <= 0) {
+                    clearInterval(state.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            if (state.isProcessing) return;
+            state.isProcessing = true;
+            playSoundEffect('wrong');
+            updateScore(-50);
+            showModal("Time's Up!", "⏰", -50, "retry");
+        }
+
+        function checkAnswer(userAnswer) {
+            if (state.isProcessing) return;
+            state.isProcessing = true;
+            clearInterval(state.timerInterval);
+
+            const correctAnswer = state.currentQuestion.answer;
+            
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                // BENAR
+                playSoundEffect('correct');
+                updateScore(100);
+                
+                // Cek apakah level terakhir stage
+                if (state.level === LEVELS_PER_STAGE) {
+                    showModal("Stage Complete!", "🎉", 100, "stageComplete");
+                } else {
+                    showModal("Correct!", "✅", 100, "nextLevel");
+                }
+            } else {
+                // SALAH
+                playSoundEffect('wrong');
+                updateScore(-50);
+                showModal("Wrong Answer!", "❌", -50, "retry");
+            }
+        }
+
+        function submitTextAnswer() {
+            if (state.isProcessing) return;
+            const input = document.getElementById('answer-input');
+            const userText = input.value.trim();
+            
+            if (userText === "") return;
+
+            state.isProcessing = true;
+            clearInterval(state.timerInterval);
+
+            // Cek jawaban (fuzzy check: apakah mengandung kata kunci)
+            // Untuk simplifikasi game anak SD, kita cek kesamaan string (ignore case) terhadap array jawaban yang diterima
+            const isCorrect = state.currentQuestion.answers.some(ans => 
+                userText.toLowerCase() === ans.toLowerCase()
+            );
+
+            if (isCorrect) {
+                playSoundEffect('correct');
+                updateScore(100);
+                if (state.level === LEVELS_PER_STAGE) {
+                    showModal("Stage Complete!", "🎉", 100, "stageComplete");
+                } else {
+                    showModal("Correct!", "✅", 100, "nextLevel");
+                }
+            } else {
+                playSoundEffect('wrong');
+                updateScore(-50);
+                showModal("Wrong Answer!", "❌", -50, "retry");
+            }
+        }
+
+        function updateScore(delta) {
+            state.score += delta;
+            document.getElementById('score-display').innerText = `Score: ${state.score}`;
+        }
+
+        // ================= MODAL & NAVIGATION =================
+
+        function showModal(title, icon, scoreChange, actionType) {
+            const modal = document.getElementById('modal');
+            const mText = document.getElementById('modal-text');
+            const mIcon = document.getElementById('modal-icon');
+            const mScore = document.getElementById('modal-score-change');
+            const mActions = document.getElementById('modal-actions');
+
+            mText.innerText = title;
+            mIcon.innerText = icon;
+            mScore.innerText = (scoreChange > 0 ? "+" : "") + scoreChange;
+            mScore.className = scoreChange > 0 ? "correct" : "wrong";
+
+            mActions.innerHTML = ''; // Reset tombol
+
+            if (actionType === "nextLevel") {
+                state.level++;
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-green';
+                btn.innerText = "Next Level ➡️";
+                btn.onclick = () => { closeModal(); loadStage(); };
+                mActions.appendChild(btn);
+            } else if (actionType === "retry") {
+                // Level ulang, score berkurang sudah dikurangi sebelumnya
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-red';
+                btn.innerText = "Retry 🔄";
+                btn.onclick = () => { closeModal(); loadStage(); };
+                mActions.appendChild(btn);
+            } else if (actionType === "stageComplete") {
+                // Selesai 1 stage (5 level)
+                // Reset level untuk stage berikutnya
+                const btnNext = document.createElement('button');
+                btnNext.className = 'btn btn-green';
+                btnNext.innerText = "Next Stage ➡️";
+                btnNext.onclick = () => { 
+                    closeModal(); 
+                    if(state.stage < TOTAL_STAGES) {
+                        state.stage++;
+                        state.level = 1;
+                        loadStage();
+                    } else {
+                        gameCompleted(); // Game tamat semua stage
+                    }
+                };
+
+                const btnMenu = document.createElement('button');
+                btnMenu.className = 'btn btn-blue';
+                btnMenu.innerText = "Main Menu 🏠";
+                btnMenu.onclick = () => { closeModal(); saveScore(); showMenu(); };
+
+                mActions.appendChild(btnNext);
+                mActions.appendChild(btnMenu);
+            } else if (actionType === "gameOver") {
+                 const btnMenu = document.createElement('button');
+                btnMenu.className = 'btn btn-red';
+                btnMenu.innerText = "Main Menu 🏠";
+                btnMenu.onclick = () => { closeModal(); saveScore(); showMenu(); };
+                mActions.appendChild(btnMenu);
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function gameCompleted() {
+            playSoundEffect('correct');
+            saveScore();
+            showModal("YOU WIN!", "🏆", 0, "gameOver");
+            // Override text sedikit
+            document.getElementById('modal-text').innerText = "All Stages Completed!";
+        }
+
+        function showMenu() {
+            stopMusic();
+            document.getElementById('player-name').value = state.playerName; // Keep name
+            switchScreen('menu-screen');
+        }
+
+        // ================= LEADERBOARD LOGIC =================
+        function saveScore() {
+            const leaderboard = JSON.parse(localStorage.getItem('ef_leaderboard')) || [];
+            
+            // Tambah score baru
+            leaderboard.push({
+                name: state.playerName,
+                score: state.score,
+                date: new Date().toLocaleDateString()
+            });
+
+            // Urutkan dari score tertinggi
+            leaderboard.sort((a, b) => b.score - a.score);
+
+            // Ambil top 10
+            const top10 = leaderboard.slice(0, 10);
+
+            localStorage.setItem('ef_leaderboard', JSON.stringify(top10));
+        }
+
+        function showLeaderboard() {
+            playSoundEffect('click');
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '';
+
+            const data = JSON.parse(localStorage.getItem('ef_leaderboard')) || [];
+
+            if (data.length === 0) {
+                list.innerHTML = '<li class="leaderboard-item" style="justify-content:center;">Belum ada data</li>';
+            } else {
+                data.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'leaderboard-item';
+                    
+                    let medal = '';
+                    if (index === 0) medal = '🥇 ';
+                    if (index === 1) medal = '🥈 ';
+                    if (index === 2) medal = '🥉 ';
+
+                    li.innerHTML = `
+                        <span>${medal}#${index+1} ${item.name}</span>
+                        <span>${item.score}</span>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+            switchScreen('leaderboard-screen');
+        }
+
+        // Event listener untuk tombol Enter pada input text
+        document.getElementById('answer-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                submitTextAnswer();
+            }
+        });
+
+    </script>
 </body>
-
 </html>
-
-
-
-
-
