@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGLISH IS FUN - Kids Discovery</title>
+    <title>ENGLISH IS FUN - Kids Discovery Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
 
@@ -31,7 +31,6 @@
             overflow: hidden;
         }
 
-        /* Container dengan sistem Grid agar tidak overlap */
         #game-container {
             width: 95%; max-width: 480px; height: 92dvh;
             background-color: var(--paper);
@@ -40,12 +39,11 @@
             box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
             position: relative;
             display: grid;
-            grid-template-rows: auto auto 1fr auto; /* Header, Timer, Content, Footer */
+            grid-template-rows: auto auto 1fr auto;
             padding: 20px 20px 20px 40px;
             overflow: hidden;
         }
 
-        /* Visual Binder */
         #game-container::before {
             content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 18px;
             background-image: radial-gradient(circle, #ccc 6px, transparent 7px);
@@ -56,50 +54,37 @@
         .screen.active { display: flex; }
         @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* HEADER & HUD */
         .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .badge { background: white; border: 2px solid var(--border-color); padding: 5px 12px; border-radius: 50px; font-weight: bold; box-shadow: 3px 3px 0px #ddd; }
 
         .timer-container { width: 100%; height: 12px; background: #eee; border: 2px solid var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
         .timer-fill { height: 100%; width: 100%; background: var(--accent); transition: width 1s linear; }
 
-        /* AREA SOAL (FLEXIBLE) */
-        #question-area {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 0; padding: 10px 0;
-        }
+        #question-area { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 0; padding: 10px 0; }
 
         .img-box {
-            width: 100%; max-height: 45vh; /* Membatasi tinggi agar tidak menabrak tombol */
+            width: 100%; max-height: 40vh;
             border: 3px solid var(--border-color); border-radius: 20px;
             overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.05);
             background: #fff; margin-bottom: 15px;
         }
         .img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* TOMBOL PILIHAN (ANTIKAKU) */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
         .option-btn {
             background: white; border: 2.5px solid var(--border-color);
             padding: 15px 5px; border-radius: 15px;
             font-family: var(--font-main); font-size: 1.2rem; font-weight: bold;
             cursor: pointer; box-shadow: 4px 4px 0px #ddd;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: 0.1s;
         }
-        .option-btn:hover { background: #fdfdfd; }
         .option-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px #ddd; }
 
-        /* BUTTONS UMUM */
-        .btn {
-            padding: 12px 20px; border-radius: 50px; border: 2.5px solid var(--border-color);
-            font-family: var(--font-bold); font-size: 1.1rem; color: white;
-            cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); width: 100%; margin-bottom: 10px;
-        }
+        .btn { padding: 12px 20px; border-radius: 50px; border: 2.5px solid var(--border-color); font-family: var(--font-bold); font-size: 1.1rem; color: white; cursor: pointer; width: 100%; margin-bottom: 10px; text-decoration: none; text-align: center; }
         .btn-blue { background: var(--primary); }
         .btn-green { background: var(--accent); }
         .btn-red { background: #FF6B6B; }
 
-        /* MODAL / POPUP */
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
         .modal-box { background: white; padding: 25px; border-radius: 25px; border: 3px solid var(--border-color); text-align: center; width: 85%; }
         
@@ -121,15 +106,16 @@
 
         <div id="screens-wrapper">
             <div id="menu-screen" class="screen active">
-                <h1 style="margin-top: 20px;">English Fun! 🐶🚗</h1>
+                <h1 style="margin-top: 10px;">English Fun! 🦁🚀</h1>
                 <div id="question-area">
-                    <div class="img-box" style="max-height: 30vh;">
-                        <img src="https://images.unsplash.com/photo-1453306458620-5bbef13a5bca?w=500&q=80" alt="Intro">
+                    <div class="img-box" style="max-height: 25vh;">
+                        <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?auto=format&fit=crop&w=500&q=80" alt="Lion">
                     </div>
                     <input type="text" id="player-name" placeholder="Siapa namamu?" maxlength="12" 
-                           style="width:100%; padding:12px; border:2px dashed #333; border-radius:12px; text-align:center; font-family:inherit; margin-bottom:15px;">
+                           style="width:100%; padding:12px; border:2px dashed #333; border-radius:12px; text-align:center; font-family:inherit; margin-bottom:10px;">
                     <button class="btn btn-blue" onclick="startGame()">MULAI MAIN</button>
                     <button class="btn btn-green" onclick="showLeaderboard()">LEADERBOARD</button>
+                    <button class="btn btn-red" onclick="location.href='index.html'">KEMBALI</button>
                 </div>
             </div>
 
@@ -148,7 +134,7 @@
                         <tbody id="lb-body"></tbody>
                     </table>
                 </div>
-                <button class="btn btn-blue" onclick="switchScreen('menu-screen')">KEMBALI</button>
+                <button class="btn btn-blue" onclick="switchScreen('menu-screen')">KE MENU UTAMA</button>
             </div>
         </div>
 
@@ -163,31 +149,45 @@
     </div>
 
     <script>
+        // Database gambar yang sudah dipastikan aktif
         const categories = {
             animals: [
-                { word: "Elephant", img: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=500&q=80", opts: ["Elephant", "Giraffe", "Lion", "Tiger"] },
-                { word: "Cat", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&q=80", opts: ["Cat", "Dog", "Rabbit", "Bird"] },
-                { word: "Lion", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=500&q=80", opts: ["Lion", "Cheetah", "Bear", "Wolf"] },
-                { word: "Bird", img: "https://images.unsplash.com/photo-1444464666168-49d633b867ad?w=500&q=80", opts: ["Bird", "Fish", "Cat", "Monkey"] },
-                { word: "Monkey", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=500&q=80", opts: ["Monkey", "Human", "Sloth", "Gorilla"] }
+                { word: "Lion", img: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=500&q=80", opts: ["Lion", "Tiger", "Cat", "Dog"] },
+                { word: "Elephant", img: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=500&q=80", opts: ["Elephant", "Pig", "Cow", "Hippo"] },
+                { word: "Giraffe", img: "https://images.unsplash.com/photo-1545910600-28011da80c8e?auto=format&fit=crop&w=500&q=80", opts: ["Giraffe", "Zebra", "Horse", "Deer"] },
+                { word: "Cat", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=500&q=80", opts: ["Cat", "Rabbit", "Mouse", "Hamster"] },
+                { word: "Tiger", img: "https://images.unsplash.com/photo-1508061214084-1df7042c13ee?auto=format&fit=crop&w=500&q=80", opts: ["Tiger", "Lion", "Leopard", "Wolf"] },
+                { word: "Zebra", img: "https://images.unsplash.com/photo-1526081347589-7fa3cb41b4b2?auto=format&fit=crop&w=500&q=80", opts: ["Zebra", "Donkey", "Horse", "Cow"] },
+                { word: "Monkey", img: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?auto=format&fit=crop&w=500&q=80", opts: ["Monkey", "Gorilla", "Sloth", "Human"] },
+                { word: "Rabbit", img: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=500&q=80", opts: ["Rabbit", "Squirrel", "Rat", "Cat"] },
+                { word: "Panda", img: "https://images.unsplash.com/photo-1564349683136-77e08bef1ed1?auto=format&fit=crop&w=500&q=80", opts: ["Panda", "Koala", "Bear", "Sloth"] },
+                { word: "Dog", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80", opts: ["Dog", "Wolf", "Fox", "Hyena"] }
             ],
             vehicles: [
-                { word: "Airplane", img: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?w=500&q=80", opts: ["Airplane", "Train", "Rocket", "Bus"] },
-                { word: "Car", img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=500&q=80", opts: ["Car", "Bike", "Truck", "Boat"] },
-                { word: "Train", img: "https://images.unsplash.com/photo-1474487056235-91642f4b3bb5?w=500&q=80", opts: ["Train", "Subway", "Tram", "Bus"] },
-                { word: "Boat", img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80", opts: ["Boat", "Ship", "Submarine", "Raft"] },
-                { word: "Bicycle", img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=500&q=80", opts: ["Bicycle", "Motorcycle", "Scooter", "Car"] }
+                { word: "Airplane", img: "https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?auto=format&fit=crop&w=500&q=80", opts: ["Airplane", "Helicopter", "Rocket", "Bird"] },
+                { word: "Submarine", img: "https://images.unsplash.com/photo-1516750105099-4b8a83e217ee?auto=format&fit=crop&w=500&q=80", opts: ["Submarine", "Boat", "Fish", "Ship"] },
+                { word: "Bicycle", img: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=500&q=80", opts: ["Bicycle", "Motorcycle", "Car", "Scooter"] },
+                { word: "Train", img: "https://images.unsplash.com/photo-1474487056235-91642f4b3bb5?auto=format&fit=crop&w=500&q=80", opts: ["Train", "Subway", "Bus", "Tram"] },
+                { word: "Bus", img: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=500&q=80", opts: ["Bus", "Truck", "Van", "Car"] },
+                { word: "Ship", img: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=500&q=80", opts: ["Ship", "Boat", "Yacht", "Canoe"] },
+                { word: "Rocket", img: "https://images.unsplash.com/photo-1517976487492-5750f3195933?auto=format&fit=crop&w=500&q=80", opts: ["Rocket", "Plane", "Star", "Alien"] },
+                { word: "Car", img: "https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=500&q=80", opts: ["Car", "Truck", "Jeep", "Taxi"] }
             ],
             objects: [
-                { word: "Umbrella", img: "https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?w=500&q=80", opts: ["Umbrella", "Hat", "Coat", "Shoes"] },
-                { word: "Phone", img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80", opts: ["Phone", "Tablet", "Laptop", "Radio"] },
-                { word: "Book", img: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&q=80", opts: ["Book", "Paper", "Pencil", "Eraser"] },
-                { word: "Laptop", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&q=80", opts: ["Laptop", "Monitor", "Keyboard", "Mouse"] },
-                { word: "Chair", img: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=500&q=80", opts: ["Chair", "Table", "Bed", "Sofa"] }
+                { word: "Pizza", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80", opts: ["Pizza", "Bread", "Cake", "Cookie"] },
+                { word: "Laptop", img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&q=80", opts: ["Laptop", "Tablet", "Monitor", "Keyboard"] },
+                { word: "Guitar", img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=500&q=80", opts: ["Guitar", "Piano", "Violin", "Drum"] },
+                { word: "Camera", img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=500&q=80", opts: ["Camera", "Phone", "Watch", "TV"] },
+                { word: "Burger", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80", opts: ["Burger", "Pizza", "Taco", "Sandwich"] },
+                { word: "Cake", img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=500&q=80", opts: ["Cake", "Bread", "Donut", "Muffin"] }
             ]
         };
 
-        let state = { score: 0, stage: 1, level: 1, timer: 15, timerInterval: null, currentQuestion: null, isProcessing: false, playerName: "" };
+        let state = { 
+            score: 0, stage: 1, level: 1, timer: 15, timerInterval: null, 
+            currentQuestion: null, isProcessing: false, playerName: "",
+            questionPool: [] 
+        };
 
         function switchScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -200,9 +200,19 @@
 
         function startGame() {
             const n = document.getElementById('player-name').value.trim();
-            if(!n) return alert("Please enter your name!");
+            if(!n) return alert("Masukkan namamu!");
             state.playerName = n; state.score = 0; state.stage = 1; state.level = 1;
-            switchScreen('game-screen'); loadQuestion();
+            switchScreen('game-screen'); 
+            preparePool(); 
+            loadQuestion();
+        }
+
+        function preparePool() {
+            let baseData;
+            if(state.stage <= 7) baseData = [...categories.animals];
+            else if(state.stage <= 14) baseData = [...categories.vehicles];
+            else baseData = [...categories.objects];
+            state.questionPool = shuffle(baseData);
         }
 
         function loadQuestion() {
@@ -213,16 +223,11 @@
             const imgC = document.getElementById('q-img-container');
             const optC = document.getElementById('options-container');
 
-            // Pilih Kategori Berdasarkan Stage
-            let pool;
-            if(state.stage <= 7) pool = categories.animals;
-            else if(state.stage <= 14) pool = categories.vehicles;
-            else pool = categories.objects;
-
-            const data = pool[Math.floor(Math.random() * pool.length)];
-            state.currentQuestion = { ans: data.word };
+            if (state.questionPool.length === 0) preparePool();
+            const data = state.questionPool.shift(); 
             
-            imgC.innerHTML = `<img src="${data.img}">`;
+            state.currentQuestion = { ans: data.word };
+            imgC.innerHTML = `<img src="${data.img}" onerror="this.src='https://via.placeholder.com/500x300?text=Image+Not+Found'">`;
             optC.innerHTML = "";
             
             shuffle([...data.opts]).forEach(o => {
@@ -279,8 +284,8 @@
             } else if (type === "clear") {
                 addBtn(acts, "NEXT STAGE", () => { 
                     closeModal(); 
-                    if(state.stage < 20) { state.stage++; state.level = 1; loadQuestion(); }
-                    else { alert("GAME COMPLETED!"); saveLB(); switchScreen('menu-screen'); }
+                    if(state.stage < 20) { state.stage++; state.level = 1; preparePool(); loadQuestion(); }
+                    else { alert("GAME SELESAI!"); saveLB(); switchScreen('menu-screen'); }
                 }, "btn-green");
                 addBtn(acts, "RETRY STAGE", () => { closeModal(); state.level = 1; loadQuestion(); }, "btn-blue");
                 addBtn(acts, "MAIN MENU", () => { closeModal(); saveLB(); location.reload(); }, "btn-red");
@@ -297,21 +302,21 @@
         function closeModal() { document.getElementById('modal').style.display = "none"; }
 
         function saveLB() {
-            let data = JSON.parse(localStorage.getItem('travel_hd_lb')) || [];
+            let data = JSON.parse(localStorage.getItem('discovery_pro_lb')) || [];
             data.push({ name: state.playerName, score: state.score });
             data.sort((a,b) => b.score - a.score);
-            localStorage.setItem('travel_hd_lb', JSON.stringify(data.slice(0,10)));
+            localStorage.setItem('discovery_pro_lb', JSON.stringify(data.slice(0,10)));
         }
 
         function showLeaderboard() {
             const body = document.getElementById('lb-body');
-            const data = JSON.parse(localStorage.getItem('travel_hd_lb')) || [];
-            body.innerHTML = data.map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`).join('') || '<tr><td colspan="3">No Data</td></tr>';
+            const data = JSON.parse(localStorage.getItem('discovery_pro_lb')) || [];
+            body.innerHTML = data.map((d, i) => `<tr><td>${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center">Belum ada data</td></tr>';
             switchScreen('leaderboard-screen');
         }
 
-        init();
-        function init() { document.getElementById('hud-area').style.display = 'none'; document.getElementById('timer-area').style.display = 'none'; }
+        document.getElementById('hud-area').style.display = 'none'; 
+        document.getElementById('timer-area').style.display = 'none';
     </script>
 </body>
 </html>
