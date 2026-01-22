@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Bendera Apa Aku</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5a623;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --dark-bg: #2c3e50;
+            --light-bg: #ecf0f1;
+            --text-color: #333;
+            --card-bg: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrolling during game */
+        }
+
+        /* Container Utama */
+        #app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--light-bg);
+            height: 100vh;
+            max-height: 900px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 500px) {
+            #app-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+        }
+
+        /* Screens Utility */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Typography & Elements */
+        h1 {
+            font-size: 2rem;
+            color: var(--dark-bg);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+            font-weight: 800;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-start { background-color: var(--success-color); color: white; }
+        .btn-leaderboard { background-color: var(--secondary-color); color: white; }
+        .btn-back { background-color: var(--danger-color); color: white; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-next { background-color: var(--success-color); color: white; }
+        .btn-retry { background-color: var(--secondary-color); color: white; }
+        .btn-menu { background-color: var(--danger-color); color: white; }
+
+        /* Game UI */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--dark-bg);
+        }
+
+        .score-board {
+            background: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timer-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 100%;
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+
+        .flag-container {
+            width: 100%;
+            height: 200px;
+            background-color: #fff;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            border: 2px solid #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .flag-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background-color: white;
+            color: var(--dark-bg);
+            padding: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #bdc3c7;
+        }
+
+        .option-btn:hover { background-color: #f7f9fa; }
+        
+        .option-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .option-btn.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: #27ae60;
+            box-shadow: 0 4px 0 #27ae60;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: #c0392b;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+
+        /* Modals (Stage Complete / Game Over) */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            width: 85%;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Leaderboard Table */
+        .leaderboard-list {
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .leaderboard-item:first-child {
+            background-color: #fff9c4;
+            font-weight: bold;
+        }
+
+        .leaderboard-item:nth-child(2) { background-color: #e0f7fa; }
+        .leaderboard-item:nth-child(3) { background-color: #f3e5f5; }
+
+        /* Music Toggle */
+        .music-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Difficulty Badges */
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+        .badge-easy { background-color: #2ecc71; }
+        .badge-normal { background-color: #f39c12; }
+        .badge-hard { background-color: #e74c3c; }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- Music Toggle Button -->
+        <button class="music-toggle" id="musicBtn" title="Musik: Off">🎵</button>
+
+        <!-- MAIN MENU -->
+        <section id="mainMenu" class="screen">
+            <h1>TEBAK BENDERA<br>APA AKU</h1>
+            
+            <div class="input-group">
+                <input type="text" id="usernameInput" placeholder="Masukkan Nama Kamu" maxlength="15">
+            </div>
+
+            <button class="btn btn-start" onclick="game.start()">START</button>
+            <button class="btn btn-leaderboard" onclick="ui.showLeaderboard()">LEADERBOARD</button>
+            <button class="btn btn-back" onclick="window.location.href='index.html'">KEMBALI</button>
+            
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #7f8c8d;">
+                Game Tebak Bendera dengan 10 Stage.<br>
+                Selesaikan semua level untuk jadi juara!
+            </p>
+        </section>
+
+        <!-- GAMEPLAY SCREEN -->
+        <section id="gameScreen" class="screen hidden">
+            <div class="game-header">
+                <div id="stageInfo">Stage 1 - Level 1</div>
+                <div class="score-board">Score: <span id="currentScore">0</span></div>
+            </div>
+
+            <div class="timer-bar-container">
+                <div id="timerBar" class="timer-bar"></div>
+            </div>
+
+            <div id="difficultyBadge" class="badge badge-easy" style="margin-bottom: 10px;">Easy</div>
+
+            <div class="flag-container">
+                <img id="flagImage" class="flag-img" src="" alt="Bendera">
+            </div>
+
+            <div class="options-grid" id="optionsContainer">
+                <!-- Buttons generated by JS -->
+            </div>
+        </section>
+
+        <!-- STAGE COMPLETE MODAL -->
+        <div id="stageModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2 class="modal-title">Stage Selesai!</h2>
+                <div class="stat-row">
+                    <span>Stage:</span>
+                    <span id="modalStageNum">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>Score Saat Ini:</span>
+                    <span id="modalScore">100</span>
+                </div>
+                <button class="btn btn-next" onclick="game.nextStage()">NEXT STAGE</button>
+                <button class="btn btn-retry" onclick="game.retryStage()">RETRY</button>
+                <button class="btn btn-menu" onclick="game.toMainMenu()">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- GAME OVER / ALL STAGES CLEAR MODAL -->
+        <div id="gameOverModal" class="modal-overlay hidden">
+            <div class="modal-content">
+                <h2 class="modal-title" id="endTitle">Permainan Selesai!</h2>
+                <div class="stat-row">
+                    <span>Pemain:</span>
+                    <span id="endName">Player</span>
+                </div>
+                <div class="stat-row">
+                    <span>Score Akhir:</span>
+                    <span id="endScore">0</span>
+                </div>
+                <p id="highScoreMsg" style="color: var(--secondary-color); margin: 10px 0; font-weight: bold;"></p>
+                <button class="btn btn-menu" onclick="game.toMainMenu()">MAIN MENU</button>
+                <button class="btn btn-back" onclick="window.location.href='index.html'">KELUAR</button>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD SCREEN -->
+        <section id="leaderboardScreen" class="screen hidden">
+            <h2>Papan Peringkat</h2>
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- List items generated by JS -->
+            </div>
+            <button class="btn btn-back" onclick="ui.showMainMenu()">KEMBALI</button>
+        </section>
+    </div>
+
+    <script>
+        // --- DATA BENDERA ---
+        // Kumpulan data negara dengan kode ISO untuk flagcdn.com
+        const flagDatabase = {
+            easy: [
+                { name: "Indonesia", code: "id" }, { name: "Amerika Serikat", code: "us" },
+                { name: "Jepang", code: "jp" }, { name: "Inggris", code: "gb" },
+                { name: "Jerman", code: "de" }, { name: "Prancis", code: "fr" },
+                { name: "Italia", code: "it" }, { name: "Kanada", code: "ca" },
+                { name: "Australia", code: "au" }, { name: "Brasil", code: "br" },
+                { name: "Rusia", code: "ru" }, { name: "China", code: "cn" },
+                { name: "Korea Selatan", code: "kr" }, { name: "India", code: "in" },
+                { name: "Singapura", code: "sg" }, { name: "Malaysia", code: "my" },
+                { name: "Thailand", code: "th" }, { name: "Vietnam", code: "vn" },
+                { name: "Filipina", code: "ph" }, { name: "Spanyol", code: "es" }
+            ],
+            normal: [
+                { name: "Argentina", code: "ar" }, { name: "Mesir", code: "eg" },
+                { name: "Turki", code: "tr" }, { name: "Pakistan", code: "pk" },
+                { name: "Bangladesh", code: "bd" }, { name: "Ukraina", code: "ua" },
+                { name: "Polandia", code: "pl" }, { name: "Yunani", code: "gr" },
+                { name: "Swedia", code: "se" }, { name: "Belanda", code: "nl" },
+                { name: "Belgia", code: "be" }, { name: "Portugal", code: "pt" },
+                { name: "Meksiko", code: "mx" }, { name: "Afrika Selatan", code: "za" },
+                { name: "Nigeria", code: "ng" }, { name: "Arab Saudi", code: "sa" },
+                { name: "Iran", code: "ir" }, { name: "Irak", code: "iq" },
+                { name: "Selandia Baru", code: "nz" }, { name: "Norwegia", code: "no" }
+            ],
+            hard: [
+                { name: "Lesotho", code: "ls" }, { name: "Tajikistan", code: "tj" },
+                { name: "Bhutan", code: "bt" }, { name: "Maladewa", code: "mv" },
+                { name: "Kepulauan Cayman", code: "ky" }, { name: "Gibraltar", code: "gi" },
+                { name: "Andorra", code: "ad" }, { name: "Monako", code: "mc" },
+                { name: "San Marino", code: "sm" }, { name: "Vatikan", code: "va" },
+                { name: "Nauru", code: "nr" }, { name: "Tuvalu", code: "tv" },
+                { name: "Tonga", code: "to" }, { name: "Fiji", code: "fj" },
+                { name: "Vanuatu", code: "vu" }, { name: "Kiribati", code: "ki" },
+                { name: "Palau", code: "pw" }, { name: "Marshall", code: "mh" },
+                { name: "Saint Lucia", code: "lc" }, { name: "Grenada", code: "gd" }
+            ]
+        };
+
+        // --- AUDIO ENGINE (Web Audio API - Monotone Easy Listening) ---
+        class AudioEngine {
+            constructor() {
+                this.context = null;
+                this.isPlaying = false;
+                this.intervalId = null;
+                this.noteIndex = 0;
+                // Nada Pentatonik C Mayor (C, D, E, G, A) untuk nuansa "Easy Listening"
+                this.notes = [
+                    261.63, 293.66, 329.63, 392.00, 440.00, // C4 - A4
+                    440.00, 392.00, 329.63, 293.66, 261.63  // A4 - C4
+                ];
+            }
+
+            init() {
+                if (!this.context) {
+                    this.context = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playNote() {
+                if (!this.isPlaying || !this.context) return;
+                
+                const osc = this.context.createOscillator();
+                const gain = this.context.createGain();
+                
+                osc.type = 'sine'; // Monotone wave
+                osc.frequency.value = this.notes[this.noteIndex];
+                
+                // Volume lembut
+                gain.gain.setValueAtTime(0.05, this.context.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 1.5);
+                
+                osc.connect(gain);
+                gain.connect(this.context.destination);
+                
+                osc.start();
+                osc.stop(this.context.currentTime + 1.5);
+
+                // Pindah ke nada berikutnya
+                this.noteIndex = (this.noteIndex + 1) % this.notes.length;
+            }
+
+            toggle() {
+                this.init();
+                if (this.context.state === 'suspended') {
+                    this.context.resume();
+                }
+
+                if (this.isPlaying) {
+                    this.stop();
+                } else {
+                    this.isPlaying = true;
+                    this.noteIndex = 0;
+                    // Mainkan loop setiap 800ms
+                    this.intervalId = setInterval(() => this.playNote(), 800);
+                    document.getElementById('musicBtn').textContent = '🔊';
+                    document.getElementById('musicBtn').title = "Musik: On";
+                }
+            }
+
+            stop() {
+                this.isPlaying = false;
+                clearInterval(this.intervalId);
+                document.getElementById('musicBtn').textContent = '🎵';
+                document.getElementById('musicBtn').title = "Musik: Off";
+            }
+        }
+
+        const audio = new AudioEngine();
+        document.getElementById('musicBtn').addEventListener('click', () => audio.toggle());
+
+
+        // --- GAME LOGIC ---
+        const game = {
+            stage: 1,
+            level: 1,
+            score: 0,
+            playerName: '',
+            timer: null,
+            timeLeft: 5,
+            currentFlag: null,
+            isLocked: false, // Mencegah klik ganda
+            maxStages: 10,
+            levelsPerStage: 5,
+
+            start: function() {
+                const nameInput = document.getElementById('usernameInput');
+                if (nameInput.value.trim() === '') {
+                    alert("Mohon isi nama kamu dulu!");
+                    return;
+                }
+                this.playerName = nameInput.value.trim();
+                
+                // Reset State
+                this.stage = 1;
+                this.level = 1;
+                this.score = 0;
+                
+                ui.hideAllScreens();
+                ui.showGameScreen();
+                this.loadStage();
+            },
+
+            getDifficulty: function(stage) {
+                if (stage <= 4) return 'easy';
+                if (stage <= 7) return 'normal';
+                return 'hard';
+            },
+
+            loadStage: function() {
+                // Setup UI untuk stage baru
+                ui.updateHeader(this.stage, this.level, this.score);
+                ui.updateDifficultyBadge(this.stage);
+                this.loadLevel();
+            },
+
+            loadLevel: function() {
+                this.isLocked = false;
+                this.timeLeft = 5;
+                
+                // Update UI Text
+                document.getElementById('stageInfo').textContent = `Stage ${this.stage} - Level ${this.level}`;
+                document.getElementById('currentScore').textContent = this.score;
+
+                // Ambil data bendera berdasarkan kesulitan
+                const difficulty = this.getDifficulty(this.stage);
+                const pool = flagDatabase[difficulty];
+                
+                // Pilih 1 jawaban benar
+                const correctIndex = Math.floor(Math.random() * pool.length);
+                this.currentFlag = pool[correctIndex];
+
+                // Pilih 3 pengecoh (dari seluruh pool agar menantang tapi masih masuk akal)
+                // Atau lebih baik dari pool yang sama agar kesulitannya konsisten
+                let options = [this.currentFlag];
+                while (options.length < 4) {
+                    const randomFlag = pool[Math.floor(Math.random() * pool.length)];
+                    if (!options.includes(randomFlag)) {
+                        options.push(randomFlag);
+                    }
+                }
+
+                // Acak posisi opsi
+                options = options.sort(() => Math.random() - 0.5);
+
+                // Render Gambar & Opsi
+                ui.renderFlag(this.currentFlag.code);
+                ui.renderOptions(options);
+
+                // Mulai Timer
+                this.startTimer();
+            },
+
+            startTimer: function() {
+                clearInterval(this.timer);
+                ui.updateTimerBar(100);
+                
+                // Warna timer normal
+                document.getElementById('timerBar').style.backgroundColor = 'var(--primary-color)';
+
+                const totalTime = 5000; // 5 detik
+                const intervalStep = 50; // update setiap 50ms
+                let timeElapsed = 0;
+
+                this.timer = setInterval(() => {
+                    timeElapsed += intervalStep;
+                    const percentage = 100 - ((timeElapsed / totalTime) * 100);
+                    
+                    ui.updateTimerBar(percentage);
+
+                    // Ubah warna jadi merah jika waktu < 2 detik
+                    if (percentage < 40) {
+                         document.getElementById('timerBar').style.backgroundColor = 'var(--danger-color)';
+                    }
+
+                    if (timeElapsed >= totalTime) {
+                        this.handleTimeOut();
+                    }
+                }, intervalStep);
+            },
+
+            handleAnswer: function(selectedName, btnElement) {
+                if (this.isLocked) return;
+                this.isLocked = true;
+                clearInterval(this.timer);
+
+                const isCorrect = (selectedName === this.currentFlag.name);
+
+                if (isCorrect) {
+                    this.score += 100;
+                    btnElement.classList.add('correct');
+                    ui.showToast("Benar!", "#2ecc71");
+                } else {
+                    this.score -= 50;
+                    btnElement.classList.add('wrong');
+                    // Highlight jawaban yang benar
+                    const buttons = document.querySelectorAll('.option-btn');
+                    buttons.forEach(btn => {
+                        if (btn.textContent === this.currentFlag.name) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                    ui.showToast("Salah!", "#e74c3c");
+                }
+
+                // Lanjut ke level berikutnya setelah delay singkat
+                setTimeout(() => {
+                    this.nextLogic();
+                }, 1500);
+            },
+
+            handleTimeOut: function() {
+                if (this.isLocked) return;
+                this.isLocked = true;
+                clearInterval(this.timer);
+                
+                this.score -= 50;
+                ui.showToast("Waktu Habis!", "#e74c3c");
+
+                // Tunjukkan jawaban benar
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent === this.currentFlag.name) {
+                        btn.classList.add('correct');
+                    } else {
+                        btn.style.opacity = '0.5';
+                    }
+                });
+
+                setTimeout(() => {
+                    this.nextLogic();
+                }, 1500);
+            },
+
+            nextLogic: function() {
+                if (this.level < this.levelsPerStage) {
+                    // Masih stage yang sama, level naik
+                    this.level++;
+                    this.loadLevel();
+                } else {
+                    // Stage selesai
+                    this.finishStage();
+                }
+            },
+
+            finishStage: function() {
+                clearInterval(this.timer);
+                if (this.stage < this.maxStages) {
+                    ui.showStageModal(this.stage, this.score);
+                } else {
+                    this.gameOver();
+                }
+            },
+
+            nextStage: function() {
+                this.stage++;
+                this.level = 1;
+                ui.hideModals();
+                this.loadStage();
+            },
+
+            retryStage: function() {
+                // Retry stage saat ini (score tidak direset, sesuai request umum game replay, 
+                // tapi jika ingin direset bisa uncomment baris di bawah. 
+                // Request user: "retry" biasanya berarti ulang stage tsb)
+                this.level = 1; 
+                ui.hideModals();
+                this.loadStage();
+            },
+
+            toMainMenu: function() {
+                clearInterval(this.timer);
+                ui.hideModals();
+                ui.showMainMenu();
+                audio.stop(); // Optional: Stop music when going to menu
+            },
+
+            gameOver: function() {
+                ui.hideModals();
+                leaderboard.saveScore(this.playerName, this.score);
+                ui.showGameOverModal(this.playerName, this.score);
+            }
+        };
+
+        // --- UI MANAGER ---
+        const ui = {
+            hideAllScreens: function() {
+                document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+            },
+
+            showMainMenu: function() {
+                this.hideAllScreens();
+                document.getElementById('mainMenu').classList.remove('hidden');
+            },
+
+            showGameScreen: function() {
+                document.getElementById('gameScreen').classList.remove('hidden');
+            },
+
+            showLeaderboard: function() {
+                this.hideAllScreens();
+                leaderboard.render();
+                document.getElementById('leaderboardScreen').classList.remove('hidden');
+            },
+
+            updateHeader: function(stage, level, score) {
+                document.getElementById('stageInfo').textContent = `Stage ${stage} - Level ${level}`;
+                document.getElementById('currentScore').textContent = score;
+            },
+
+            updateDifficultyBadge: function(stage) {
+                const badge = document.getElementById('difficultyBadge');
+                badge.className = 'badge'; // reset
+                if (stage <= 4) {
+                    badge.textContent = "EASY";
+                    badge.classList.add('badge-easy');
+                } else if (stage <= 7) {
+                    badge.textContent = "NORMAL";
+                    badge.classList.add('badge-normal');
+                } else {
+                    badge.textContent = "HARD";
+                    badge.classList.add('badge-hard');
+                }
+            },
+
+            updateTimerBar: function(percentage) {
+                document.getElementById('timerBar').style.width = percentage + '%';
+            },
+
+            renderFlag: function(code) {
+                const img = document.getElementById('flagImage');
+                // Reset gambar sementara
+                img.src = ''; 
+                // Gunakan flagcdn
+                img.src = `https://flagcdn.com/w320/${code}.png`;
+            },
+
+            renderOptions: function(options) {
+                const container = document.getElementById('optionsContainer');
+                container.innerHTML = ''; // Clear old
+
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt.name;
+                    btn.onclick = () => game.handleAnswer(opt.name, btn);
+                    container.appendChild(btn);
+                });
+            },
+
+            showStageModal: function(stage, score) {
+                document.getElementById('modalStageNum').textContent = stage;
+                document.getElementById('modalScore').textContent = score;
+                document.getElementById('stageModal').classList.remove('hidden');
+            },
+
+            showGameOverModal: function(name, score) {
+                const isHigh = leaderboard.isHighScore(score);
+                document.getElementById('endName').textContent = name;
+                document.getElementById('endScore').textContent = score;
+                
+                const msg = document.getElementById('highScoreMsg');
+                if (isHigh) {
+                    msg.textContent = "Selamat! Score Tertinggi Baru!";
+                } else {
+                    msg.textContent = "";
+                }
+
+                document.getElementById('gameOverModal').classList.remove('hidden');
+            },
+
+            hideModals: function() {
+                document.querySelectorAll('.modal-overlay').forEach(el => el.classList.add('hidden'));
+            },
+
+            showToast: function(text, color) {
+                // Simple visual feedback on top
+                const toast = document.createElement('div');
+                toast.textContent = text;
+                toast.style.position = 'absolute';
+                toast.style.top = '40%';
+                toast.style.left = '50%';
+                toast.style.transform = 'translate(-50%, -50%)';
+                toast.style.background = color;
+                toast.style.color = 'white';
+                toast.style.padding = '15px 30px';
+                toast.style.borderRadius = '50px';
+                toast.style.fontWeight = 'bold';
+                toast.style.zIndex = '999';
+                toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                toast.style.animation = 'popIn 0.2s';
+                
+                document.getElementById('app-container').appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 1000);
+            }
+        };
+
+        // --- LEADERBOARD MANAGER (LocalStorage) ---
+        const leaderboard = {
+            storageKey: 'flagGame_leaderboard_v1',
+
+            getScores: function() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : [];
+            },
+
+            saveScore: function(name, score) {
+                let scores = this.getScores();
+                scores.push({ name, score, date: new Date().toLocaleDateString() });
+                // Urutkan dari score terbesar
+                scores.sort((a, b) => b.score - a.score);
+                // Simpan top 20 saja
+                scores = scores.slice(0, 20);
+                localStorage.setItem(this.storageKey, JSON.stringify(scores));
+            },
+
+            isHighScore: function(score) {
+                const scores = this.getScores();
+                if (scores.length === 0) return true;
+                return score > scores[0].score;
+            },
+
+            render: function() {
+                const list = document.getElementById('leaderboardList');
+                const scores = this.getScores();
+                list.innerHTML = '';
+
+                if (scores.length === 0) {
+                    list.innerHTML = '<div style="padding:20px; text-align:center; color:#777;">Belum ada data skor</div>';
+                    return;
+                }
+
+                scores.forEach((item, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'leaderboard-item';
+                    row.innerHTML = `
+                        <span>#${index + 1} ${item.name}</span>
+                        <span>${item.score}</span>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        };
+
+        // Inisialisasi
+        // Cek LocalStorage untuk pertama kali
+        if (!localStorage.getItem('flagGame_leaderboard_v1')) {
+            localStorage.setItem('flagGame_leaderboard_v1', JSON.stringify([]));
+        }
+
+    </script>
+</body>
+</html>
