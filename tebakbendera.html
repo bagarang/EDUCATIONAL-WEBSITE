@@ -3,24 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tebak Bendera Apa Aku</title>
+    <title>Tebak Bendera Sci-Fi</title>
+    <!-- Import Font Sci-Fi -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* --- CSS DIUBAH TOTAL MENJADI TEMA SCI-FI ANAK-ANAK --- */
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #f5a623;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --dark-bg: #2c3e50;
-            --light-bg: #ecf0f1;
-            --text-color: #333;
-            --card-bg: #fff;
+            --primary-color: #00f3ff;   /* Neon Cyan */
+            --secondary-color: #bc13fe; /* Neon Purple */
+            --success-color: #0aff0a;  /* Neon Green */
+            --danger-color: #ff003c;   /* Neon Red */
+            --dark-bg: #050b14;        /* Space Dark */
+            --light-bg: #1a1f35;       /* Panel Blue-Grey */
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.1);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif; /* Font body default */
         }
 
         body {
@@ -30,27 +34,42 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; /* Prevent scrolling during game */
+            overflow: hidden;
+            /* Background Bintang Bergerak */
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+            animation: starMove 60s linear infinite;
+        }
+
+        @keyframes starMove {
+            from { background-position: 0 0, 40px 60px, 130px 270px; }
+            to { background-position: 550px 550px, 390px 410px, 680px 820px; }
         }
 
         /* Container Utama */
         #app-container {
             width: 100%;
             max-width: 480px;
-            background-color: var(--light-bg);
+            background-color: rgba(16, 33, 60, 0.95); /* Transparan sedikit */
             height: 100vh;
             max-height: 900px;
             position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px var(--primary-color), inset 0 0 20px rgba(0, 243, 255, 0.2);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            border: 2px solid var(--primary-color);
         }
 
         @media (min-width: 500px) {
             #app-container {
                 height: 90vh;
-                border-radius: 15px;
+                border-radius: 20px;
+                clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
             }
         }
 
@@ -66,7 +85,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            background: radial-gradient(circle at center, #1a2542 0%, #050b14 100%);
             transition: opacity 0.3s ease;
             z-index: 1;
         }
@@ -79,17 +98,21 @@
 
         /* Typography & Elements */
         h1 {
-            font-size: 2rem;
-            color: var(--dark-bg);
+            font-family: 'Orbitron', sans-serif; /* Font Sci-Fi */
+            font-size: 2.2rem;
+            color: var(--primary-color);
             text-align: center;
             margin-bottom: 20px;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
-            font-weight: 800;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--primary-color);
+            letter-spacing: 2px;
         }
 
         h2 {
             margin-bottom: 15px;
-            color: var(--primary-color);
+            color: var(--secondary-color);
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--secondary-color);
         }
 
         .input-group {
@@ -100,43 +123,77 @@
         input[type="text"] {
             width: 100%;
             padding: 15px;
-            border: 2px solid #bdc3c7;
+            border: 2px solid var(--primary-color);
+            background: rgba(0,0,0,0.5);
+            color: var(--primary-color);
             border-radius: 10px;
             font-size: 1.1rem;
+            font-family: 'Orbitron', sans-serif;
             text-align: center;
             outline: none;
-            transition: border-color 0.3s;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
         }
 
         input[type="text"]:focus {
-            border-color: var(--primary-color);
+            background: rgba(0, 243, 255, 0.1);
         }
 
-        /* Buttons */
+        /* Buttons - Style Sci-Fi */
         .btn {
             width: 100%;
             padding: 15px;
             margin: 10px 0;
-            border: none;
-            border-radius: 10px;
+            border: 2px solid;
+            border-radius: 8px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:active {
-            transform: scale(0.98);
+        .btn:active { transform: scale(0.98); }
+
+        .btn-start { 
+            border-color: var(--success-color); 
+            color: var(--success-color); 
+            box-shadow: 0 0 10px rgba(10, 255, 10, 0.2); 
+        }
+        .btn-start:hover { 
+            background: var(--success-color); 
+            color: black; 
+            box-shadow: 0 0 20px var(--success-color);
         }
 
-        .btn-start { background-color: var(--success-color); color: white; }
-        .btn-leaderboard { background-color: var(--secondary-color); color: white; }
-        .btn-back { background-color: var(--danger-color); color: white; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-next { background-color: var(--success-color); color: white; }
-        .btn-retry { background-color: var(--secondary-color); color: white; }
-        .btn-menu { background-color: var(--danger-color); color: white; }
+        .btn-leaderboard { 
+            border-color: var(--secondary-color); 
+            color: var(--secondary-color); 
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+        }
+        .btn-leaderboard:hover { 
+            background: var(--secondary-color); 
+            color: black; 
+            box-shadow: 0 0 20px var(--secondary-color);
+        }
+
+        .btn-back { 
+            border-color: var(--danger-color); 
+            color: var(--danger-color); 
+            box-shadow: 0 0 10px rgba(255, 0, 60, 0.2);
+        }
+        .btn-back:hover { 
+            background: var(--danger-color); 
+            color: white; 
+            box-shadow: 0 0 20px var(--danger-color);
+        }
+
+        .btn-primary { border-color: var(--primary-color); color: var(--primary-color); }
+        .btn-primary:hover { background: var(--primary-color); color: black; }
 
         /* Game UI */
         .game-header {
@@ -145,23 +202,26 @@
             justify-content: space-between;
             margin-bottom: 20px;
             font-weight: bold;
-            color: var(--dark-bg);
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
         }
 
         .score-board {
-            background: #fff;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--success-color);
             padding: 5px 15px;
             border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(10, 255, 10, 0.2);
         }
 
         .timer-bar-container {
             width: 100%;
-            height: 10px;
-            background-color: #ddd;
-            border-radius: 5px;
+            height: 12px;
+            background-color: #333;
+            border-radius: 6px;
             margin-bottom: 20px;
             overflow: hidden;
+            border: 1px solid #555;
         }
 
         .timer-bar {
@@ -169,21 +229,32 @@
             background-color: var(--primary-color);
             width: 100%;
             transition: width 0.1s linear, background-color 0.3s;
+            box-shadow: 0 0 10px var(--primary-color);
         }
 
         .flag-container {
             width: 100%;
             height: 200px;
-            background-color: #fff;
+            background-color: rgba(0,0,0,0.5);
             border-radius: 15px;
+            border: 2px solid var(--primary-color);
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 25px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-            border: 2px solid #fff;
-            overflow: hidden;
             position: relative;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), inset 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+        /* Efek Hologram pada gambar */
+        .flag-container::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
         .flag-img {
@@ -201,46 +272,48 @@
         }
 
         .option-btn {
-            background-color: white;
-            color: var(--dark-bg);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
             padding: 20px;
-            border: 2px solid #bdc3c7;
+            border: 2px solid var(--primary-color);
             border-radius: 10px;
             font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 4px 0 #bdc3c7;
+            backdrop-filter: blur(5px);
         }
 
-        .option-btn:hover { background-color: #f7f9fa; }
+        .option-btn:hover { 
+            background-color: var(--primary-color); 
+            color: black; 
+            box-shadow: 0 0 15px var(--primary-color);
+        }
         
         .option-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
+            transform: scale(0.95);
         }
 
         .option-btn.correct {
             background-color: var(--success-color);
-            color: white;
-            border-color: #27ae60;
-            box-shadow: 0 4px 0 #27ae60;
+            color: black;
+            border-color: var(--success-color);
+            box-shadow: 0 0 20px var(--success-color);
         }
 
         .option-btn.wrong {
             background-color: var(--danger-color);
             color: white;
-            border-color: #c0392b;
-            box-shadow: 0 4px 0 #c0392b;
+            border-color: var(--danger-color);
+            opacity: 0.7;
         }
 
-        /* Modals (Stage Complete / Game Over) */
+        /* Modals */
         .modal-overlay {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -248,12 +321,14 @@
         }
 
         .modal-content {
-            background: white;
+            background: #1a1f35;
+            border: 2px solid var(--primary-color);
             width: 85%;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
             animation: popIn 0.3s ease-out;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
         }
 
         @keyframes popIn {
@@ -265,6 +340,8 @@
             font-size: 1.5rem;
             margin-bottom: 10px;
             color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px var(--primary-color);
         }
 
         .stat-row {
@@ -272,7 +349,7 @@
             justify-content: space-between;
             margin: 10px 0;
             font-size: 1.1rem;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
             padding-bottom: 5px;
         }
 
@@ -281,7 +358,8 @@
             width: 100%;
             max-height: 300px;
             overflow-y: auto;
-            background: white;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--primary-color);
             border-radius: 10px;
             margin-bottom: 20px;
         }
@@ -290,48 +368,54 @@
             display: flex;
             justify-content: space-between;
             padding: 10px 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             font-size: 0.9rem;
+            font-family: 'Orbitron', sans-serif;
         }
 
         .leaderboard-item:first-child {
-            background-color: #fff9c4;
+            background-color: rgba(10, 255, 10, 0.2);
+            color: var(--success-color);
             font-weight: bold;
+            border-bottom: 1px solid var(--success-color);
         }
-
-        .leaderboard-item:nth-child(2) { background-color: #e0f7fa; }
-        .leaderboard-item:nth-child(3) { background-color: #f3e5f5; }
+        .leaderboard-item:nth-child(2) { color: var(--primary-color); }
+        .leaderboard-item:nth-child(3) { color: var(--secondary-color); }
 
         /* Music Toggle */
         .music-toggle {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(0,0,0,0.1);
-            border: none;
+            top: 15px; right: 15px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 200;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 40px; height: 40px;
+            font-size: 1.2rem; cursor: pointer; z-index: 200;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 10px var(--secondary-color);
         }
 
         /* Difficulty Badges */
         .badge {
             display: inline-block;
             padding: 5px 10px;
-            border-radius: 5px;
+            border-radius: 20px;
             color: white;
             font-size: 0.8rem;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .badge-easy { background-color: #2ecc71; }
-        .badge-normal { background-color: #f39c12; }
-        .badge-hard { background-color: #e74c3c; }
+        .badge-easy { background-color: var(--success-color); color: black; box-shadow: 0 0 10px var(--success-color); }
+        .badge-normal { background-color: var(--primary-color); color: black; box-shadow: 0 0 10px var(--primary-color); }
+        .badge-hard { background-color: var(--danger-color); color: white; box-shadow: 0 0 10px var(--danger-color); }
+
+        /* Scrollbar Custom */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050b14; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
 
     </style>
 </head>
@@ -339,21 +423,21 @@
 
     <div id="app-container">
         <!-- Music Toggle Button -->
-        <button class="music-toggle" id="musicBtn" title="Musik: Off">🎵</button>
+        <button class="music-toggle" id="musicBtn" title="Musik: Off">🔇</button>
 
         <!-- MAIN MENU -->
         <section id="mainMenu" class="screen">
-            <h1>TEBAK BENDERA<br>APA AKU</h1>
+            <h1>TEBAK BENDERA<br>SCI-FI</h1>
             
             <div class="input-group">
-                <input type="text" id="usernameInput" placeholder="Masukkan Nama Kamu" maxlength="15">
+                <input type="text" id="usernameInput" placeholder="MASUKKAN NAMA PILOT" maxlength="15">
             </div>
 
             <button class="btn btn-start" onclick="game.start()">START</button>
             <button class="btn btn-leaderboard" onclick="ui.showLeaderboard()">LEADERBOARD</button>
             <button class="btn btn-back" onclick="window.location.href='index.html'">KEMBALI</button>
             
-            <p style="margin-top: 20px; font-size: 0.8rem; color: #7f8c8d;">
+            <p style="margin-top: 20px; font-size: 0.8rem; color: var(--primary-color); opacity: 0.7;">
                 Game Tebak Bendera dengan 10 Stage.<br>
                 Selesaikan semua level untuk jadi juara!
             </p>
@@ -393,9 +477,9 @@
                     <span>Score Saat Ini:</span>
                     <span id="modalScore">100</span>
                 </div>
-                <button class="btn btn-next" onclick="game.nextStage()">NEXT STAGE</button>
-                <button class="btn btn-retry" onclick="game.retryStage()">RETRY</button>
-                <button class="btn btn-menu" onclick="game.toMainMenu()">MAIN MENU</button>
+                <button class="btn btn-start" onclick="game.nextStage()">NEXT STAGE</button>
+                <button class="btn btn-leaderboard" onclick="game.retryStage()">RETRY</button>
+                <button class="btn btn-back" onclick="game.toMainMenu()">MAIN MENU</button>
             </div>
         </div>
 
@@ -412,14 +496,14 @@
                     <span id="endScore">0</span>
                 </div>
                 <p id="highScoreMsg" style="color: var(--secondary-color); margin: 10px 0; font-weight: bold;"></p>
-                <button class="btn btn-menu" onclick="game.toMainMenu()">MAIN MENU</button>
-                <button class="btn btn-back" onclick="window.location.href='index.html'">KELUAR</button>
+                <button class="btn btn-back" onclick="game.toMainMenu()">MAIN MENU</button>
+                <button class="btn btn-start" style="border-color:white; color:white;" onclick="window.location.href='index.html'">KELUAR</button>
             </div>
         </div>
 
         <!-- LEADERBOARD SCREEN -->
         <section id="leaderboardScreen" class="screen hidden">
-            <h2>Papan Peringkat</h2>
+            <h2 style="color:var(--primary-color);">PAPAN PERINGKAT</h2>
             <div class="leaderboard-list" id="leaderboardList">
                 <!-- List items generated by JS -->
             </div>
@@ -533,7 +617,7 @@
             stop() {
                 this.isPlaying = false;
                 clearInterval(this.intervalId);
-                document.getElementById('musicBtn').textContent = '🎵';
+                document.getElementById('musicBtn').textContent = '🔇';
                 document.getElementById('musicBtn').title = "Musik: Off";
             }
         }
@@ -558,11 +642,17 @@
             start: function() {
                 const nameInput = document.getElementById('usernameInput');
                 if (nameInput.value.trim() === '') {
-                    alert("Mohon isi nama kamu dulu!");
+                    alert("Mohon isi nama pilot kamu dulu!");
                     return;
                 }
                 this.playerName = nameInput.value.trim();
                 
+                // Coba nyalakan musik jika belum nyala (karena butuh interaksi user)
+                audio.init();
+                if(audio.context && audio.context.state === 'suspended') {
+                    audio.context.resume();
+                }
+
                 // Reset State
                 this.stage = 1;
                 this.level = 1;
@@ -602,8 +692,7 @@
                 const correctIndex = Math.floor(Math.random() * pool.length);
                 this.currentFlag = pool[correctIndex];
 
-                // Pilih 3 pengecoh (dari seluruh pool agar menantang tapi masih masuk akal)
-                // Atau lebih baik dari pool yang sama agar kesulitannya konsisten
+                // Pilih 3 pengecoh
                 let options = [this.currentFlag];
                 while (options.length < 4) {
                     const randomFlag = pool[Math.floor(Math.random() * pool.length)];
@@ -628,7 +717,8 @@
                 ui.updateTimerBar(100);
                 
                 // Warna timer normal
-                document.getElementById('timerBar').style.backgroundColor = 'var(--primary-color)';
+                const bar = document.getElementById('timerBar');
+                bar.style.backgroundColor = 'var(--primary-color)';
 
                 const totalTime = 5000; // 5 detik
                 const intervalStep = 50; // update setiap 50ms
@@ -642,7 +732,7 @@
 
                     // Ubah warna jadi merah jika waktu < 2 detik
                     if (percentage < 40) {
-                         document.getElementById('timerBar').style.backgroundColor = 'var(--danger-color)';
+                         bar.style.backgroundColor = 'var(--danger-color)';
                     }
 
                     if (timeElapsed >= totalTime) {
@@ -661,7 +751,7 @@
                 if (isCorrect) {
                     this.score += 100;
                     btnElement.classList.add('correct');
-                    ui.showToast("Benar!", "#2ecc71");
+                    ui.showToast("Benar!", "#2ecc71"); // Warna standar hijau
                 } else {
                     this.score -= 50;
                     btnElement.classList.add('wrong');
@@ -672,7 +762,7 @@
                             btn.classList.add('correct');
                         }
                     });
-                    ui.showToast("Salah!", "#e74c3c");
+                    ui.showToast("Salah!", "#e74c3c"); // Warna standar merah
                 }
 
                 // Lanjut ke level berikutnya setelah delay singkat
@@ -732,9 +822,7 @@
             },
 
             retryStage: function() {
-                // Retry stage saat ini (score tidak direset, sesuai request umum game replay, 
-                // tapi jika ingin direset bisa uncomment baris di bawah. 
-                // Request user: "retry" biasanya berarti ulang stage tsb)
+                // Retry stage saat ini (score tidak direset)
                 this.level = 1; 
                 ui.hideModals();
                 this.loadStage();
@@ -870,7 +958,7 @@
             }
         };
 
-        // --- LEADERBOARD MANAGER (LocalStorage) ---
+        // --- LEADERBOARD MANAGER (PERBAIKAN LOGIKA) ---
         const leaderboard = {
             storageKey: 'flagGame_leaderboard_v1',
 
@@ -881,7 +969,21 @@
 
             saveScore: function(name, score) {
                 let scores = this.getScores();
-                scores.push({ name, score, date: new Date().toLocaleDateString() });
+                
+                // CARI NAMA PEMAIN YANG SAMA
+                const existingIndex = scores.findIndex(item => item.name === name);
+
+                if (existingIndex >= 0) {
+                    // JIKA NAMA SUDAH ADA, UPDATE SKORNYA
+                    // Kita ambil skor tertinggi antara skor lama dan baru (atau ganti total sesuai request)
+                    // Disini saya update ke skor baru agar realtime sesuai permintaan "tidak roll back"
+                    scores[existingIndex].score = score; 
+                    scores[existingIndex].date = new Date().toLocaleDateString();
+                } else {
+                    // JIKA NAMA BELUM ADA, TAMBAH BARU
+                    scores.push({ name, score, date: new Date().toLocaleDateString() });
+                }
+
                 // Urutkan dari score terbesar
                 scores.sort((a, b) => b.score - a.score);
                 // Simpan top 20 saja
@@ -901,7 +1003,7 @@
                 list.innerHTML = '';
 
                 if (scores.length === 0) {
-                    list.innerHTML = '<div style="padding:20px; text-align:center; color:#777;">Belum ada data skor</div>';
+                    list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--primary-color);">Belum ada data skor</div>';
                     return;
                 }
 
