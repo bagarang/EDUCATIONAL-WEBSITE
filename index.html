@@ -1,81 +1,248 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Game Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Sci-Fi Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --accent: #5ac8fa;
+      --glass-bg: rgba(255,255,255,0.14);
+      --glass-border: rgba(255,255,255,0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #05080f;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* BACKGROUND */
+    .background {
+      position: fixed;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(10px) brightness(0.55);
+      transform: scale(1.08);
+      transition: background-image 0.4s ease;
+      z-index: -2;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to top, rgba(5,8,15,0.95) 25%, rgba(5,8,15,0.25));
+      z-index: -1;
+    }
+
+    /* INFO PANEL */
+    .info-panel {
+      position: absolute;
+      left: 40px;
+      top: 120px;
+      max-width: 520px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .info-panel h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 34px;
+      margin: 0 0 14px;
+      letter-spacing: 1px;
+    }
+
+    .info-panel p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #d6dbea;
+    }
+
+    /* THUMBNAIL GRID (HYBRID SCROLL) */
+    .rail {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 26px;
+      max-height: 340px;
+      padding: 0 40px 10px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 26px;
+      overflow: auto;
+    }
+
+    .rail::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    .rail::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.25);
+      border-radius: 10px;
+    }
+
+    .rail::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .rail::-webkit-scrollbar { display: none; }
+
+    .game-card {
+      width: 100%;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.55);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .game-card:hover .thumb {
+      transform: scale(1.12);
+      box-shadow: 0 26px 60px rgba(0,0,0,0.75);
+    }
+
+    .thumb-title {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      body { overflow-y: auto; }
+
+      .info-panel {
+        position: relative;
+        left: auto;
+        top: auto;
+        padding: 20px;
+        max-width: 100%;
+      }
+
+      .info-panel h1 { font-size: 22px; }
+      .info-panel p { font-size: 14px; }
+
+      .rail {
+        position: relative;
+        bottom: auto;
+        max-height: none;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        padding: 0 20px 30px;
+      }
+    }
+
+      .info-panel {
+        position: relative;
+        left: auto;
+        top: auto;
+        padding: 20px;
+        max-width: 100%;
+      }
+
+      .info-panel h1 {
+        font-size: 22px;
+      }
+
+      .info-panel p {
+        font-size: 14px;
+      }
+
+      .rail {
+        position: relative;
+        bottom: auto;
+        margin-top: 20px;
+        padding: 0 20px 30px;
+      }
+    }
+      .info-panel h1 { font-size: 24px; }
+      .rail { padding: 0 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- 🔵 LOADING SCREEN -->
-<div id="loading">
-  <div class="loader-core"></div>
-  <div class="loading-text">INITIALIZING SYSTEM</div>
-</div>
-
-<!-- 🟢 MAIN MENU -->
-<div class="bg hidden" id="main">
+  <!-- BACKGROUND -->
+  <div class="background" id="bg" style="background-image:url('https://i.imgur.com/Le41ky8.png')"></div>
   <div class="overlay"></div>
 
-  <div class="menu-box">
-    <h1 class="title">GAME PORTAL</h1>
+  <!-- INFO PANEL -->
+  <div class="info-panel" id="info">
+    <h1>Game Cara Menggunakan Komputer 1–3</h1>
+    <p>Game edukasi interaktif untuk siswa kelas 1 sampai 3 dalam mengenal dasar penggunaan komputer secara menyenangkan.</p>
+  </div>
 
-    <a href="game-cara-1-3.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">GAME CARA MENGGUNAKAN KOMPUTER KELAS 1–3</span>
+  <!-- THUMBNAILS -->
+  <div class="rail">
+
+    <a class="game-card" href="game-cara-1-3.html" onmouseenter="setGame('https://i.imgur.com/Le41ky8.png','Game Cara Menggunakan Komputer 1–3','Game edukasi interaktif untuk siswa kelas 1 sampai 3 dalam mengenal dasar penggunaan komputer secara menyenangkan.')">
+      <div class="thumb"><img src="https://i.imgur.com/22WXhNX.png"></div>
+      <div class="thumb-title">Komputer 1–3</div>
     </a>
 
-    <a href="game-cara-4-6.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">GAME CARA MENGGUNAKAN KOMPUTER KELAS 4–6</span>
+    <a class="game-card" href="game-cara-4-6.html" onmouseenter="setGame('https://i.imgur.com/y9sK0Vm.png','Game Cara Menggunakan Komputer 4–6','Game edukasi untuk mengajarkan anak usia sekolah kelas 4 sampai 6 dalam memakai komputer pada tahap lanjutan, melatih kemandirian dan ketelitian penggunaan perangkat.')">
+      <div class="thumb"><img src="https://i.imgur.com/22WXhNX.png"></div>
+      <div class="thumb-title">Komputer 4–6</div>
     </a>
 
-    <a href="pokemon.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">POKEMON TYPING GAME</span>
+    <a class="game-card" href="pokemon.html" onmouseenter="setGame('https://i.imgur.com/yaxWO7f.png','Pokemon Typing Game','Game bertema Pokemon untuk melatih kelincahan jari, koordinasi mata, dan konsentrasi dalam mengetik sekaligus membiasakan penggunaan keyboard dengan benar.')">
+      <div class="thumb"><img src="https://i.imgur.com/onhuyyV.png"></div>
+      <div class="thumb-title">Pokemon Typing</div>
     </a>
 
-    <a href="tebakbendera.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">TEBAK BENDERA</span>
+    <a class="game-card" href="tebakbendera.html" onmouseenter="setGame('https://i.imgur.com/yEqHloo.png','Tebak Bendera','Game edukasi untuk melatih pengetahuan geografi dan wawasan kebangsaan dengan cara menebak bendera negara secara interaktif dan menyenangkan.')">
+      <div class="thumb"><img src="https://i.imgur.com/CX0iLJL.png"></div>
+      <div class="thumb-title">Tebak Bendera</div>
     </a>
 
-    <a href="math.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">MATEMATIKA MENYENANGKAN</span>
+    <a class="game-card" href="math.html" onmouseenter="setGame('https://i.imgur.com/qvIRG2Y.png','Matematika Menyenangkan','Game matematika interaktif yang dirancang untuk melatih logika, kecepatan berpikir, dan kemampuan berhitung dasar hingga lanjutan dengan cara yang seru.')">
+      <div class="thumb"><img src="https://i.imgur.com/JsrDv1R.png"></div>
+      <div class="thumb-title">Matematika</div>
     </a>
 
-    <a href="english.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">ENGLISH IS FUN</span>
+    <a class="game-card" href="english.html" onmouseenter="setGame('https://i.imgur.com/E02T0tz.png','English Is Fun','Game pembelajaran bahasa Inggris yang membantu meningkatkan kosakata, pemahaman kata, dan kepercayaan diri anak dalam belajar bahasa asing.')">
+      <div class="thumb"><img src="https://i.imgur.com/U5kNwpl.png"></div>
+      <div class="thumb-title">English Is Fun</div>
     </a>
 
-    <a href="game-station.html" class="menu-item">
-      <span class="icon">◆</span>
-      <span class="text">GAME STATION</span>
+    <a class="game-card" href="game-station.html" onmouseenter="setGame('https://i.imgur.com/yiAtFhg.png','Game Station','Pusat permainan digital yang menyediakan berbagai game pilihan untuk hiburan dan eksplorasi, dikemas dalam satu launcher yang aman dan mudah digunakan.')">
+      <div class="thumb"><img src="https://i.imgur.com/8nTzRnC.png"></div>
+      <div class="thumb-title">Game Station</div>
     </a>
 
   </div>
-</div>
 
+  <script>
+    function setGame(bg, title, desc) {
+      document.getElementById('bg').style.backgroundImage = `url('${bg}')`;
+      document.getElementById('info').innerHTML = `<h1>${title}</h1><p>${desc}</p>`;
+    }
+  </script>
 
-<!-- 🔊 SOUND -->
-<audio id="hoverSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3"></audio>
-<audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
-
-<script src="js/main.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
