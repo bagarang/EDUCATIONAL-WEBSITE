@@ -20,7 +20,7 @@
       --card-border: rgba(255,255,255,0.12);
       --text: #ffffff;
       --subtext: #b5b5b5;
-      --accent: #0a84ff; /* iOS blue */
+      --accent: #0a84ff;
       --radius: 18px;
       --blur: blur(20px);
     }
@@ -44,7 +44,29 @@
     .app {
       width: 100%;
       max-width: 420px;
-      padding: 20px 16px 28px;
+      padding: 16px 16px 28px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .topbar button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .topbar span {
+      font-size: 16px;
+      font-weight: 600;
     }
 
     /* Header */
@@ -57,7 +79,6 @@
       font-size: 22px;
       font-weight: 700;
       margin: 0;
-      letter-spacing: 0.3px;
     }
 
     .header p {
@@ -127,7 +148,6 @@
       color: var(--subtext);
     }
 
-    /* Desktop enhancement */
     @media (min-width: 768px) {
       .app {
         max-width: 480px;
@@ -138,6 +158,13 @@
 <body>
 
   <div class="app">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <button onclick="goHome()">Home</button>
+      <span>Game Station</span>
+      <button onclick="goBack()">Back</button>
+    </div>
 
     <div class="header">
       <h1>Game Station</h1>
@@ -171,6 +198,14 @@
   <script>
     function launchGame(url) {
       window.open(url, '_blank');
+    }
+
+    function goHome() {
+      window.location.href = 'index.html';
+    }
+
+    function goBack() {
+      window.history.back();
     }
   </script>
 
