@@ -21,29 +21,34 @@
     body {
       margin: 0;
       font-family: 'Inter', system-ui, sans-serif;
-      background: #05080f;
+      background: #000;
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
       overflow-y: auto;
     }
 
-    /* FIX: Background Layering System */
-    .bg-container {
+    /* BACKGROUND SYSTEM - Menggunakan Layering untuk kepastian transisi */
+    #bg-container {
       position: fixed;
       inset: 0;
       z-index: -2;
-      background: #05080f;
+      background: #000;
     }
 
-    .background-layer {
+    .bg-layer {
       position: absolute;
       inset: 0;
       background-size: cover;
       background-position: center;
       filter: brightness(0.3) saturate(1.2);
       transform: scale(1.05);
-      transition: opacity 0.7s ease-in-out; /* Transisi smooth */
+      transition: opacity 0.6s ease-in-out;
+      opacity: 0;
+    }
+
+    .bg-layer.active {
+      opacity: 1;
     }
 
     .overlay {
@@ -54,6 +59,7 @@
       z-index: -1;
     }
 
+    /* UI LAYOUT */
     .app-container {
       padding: 60px 5% 40px;
       max-width: 1400px;
@@ -108,7 +114,6 @@
       border-radius: var(--radius);
       background: var(--glass);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       border: 2px solid transparent;
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -122,7 +127,7 @@
 
     .thumb img {
       width: 100%; height: 100%; object-fit: cover;
-      opacity: 0.8; transition: opacity 0.3s ease;
+      opacity: 0.7; transition: opacity 0.3s ease;
     }
 
     .game-card:hover .thumb img { opacity: 1; }
@@ -137,9 +142,9 @@
 </head>
 <body>
 
-  <div class="bg-container">
-    <div class="background-layer" id="bg1" style="background-image:url('https://i.imgur.com/Le41ky8.png'); opacity: 1;"></div>
-    <div class="background-layer" id="bg2" style="opacity: 0;"></div>
+  <div id="bg-container">
+    <div id="bg1" class="bg-layer active" style="background-image:url('https://i.imgur.com/Le41ky8.png');"></div>
+    <div id="bg2" class="bg-layer"></div>
   </div>
   <div class="overlay"></div>
 
@@ -188,27 +193,29 @@
   </div>
 
   <script>
-    let activeLayer = 1;
+    let currentImage = 'https://i.imgur.com/Le41ky8.png';
 
     function setGame(bg, title, desc) {
+      // Jika kursor bergerak di thumbnail yang sama, jangan lakukan apa-apa (Mencegah Bug Flicker)
+      if (bg === currentImage) return;
+
       const bg1 = document.getElementById('bg1');
       const bg2 = document.getElementById('bg2');
       const info = document.getElementById('info');
 
-      // Update Teks Langsung
+      // Update Teks
       info.innerHTML = `<h1>${title}</h1><p>${desc}</p>`;
+      currentImage = bg;
 
-      // Logika Swap Background yang Foolproof
-      if (activeLayer === 1) {
+      // Logika Swap Layer yang Pasti Berhasil
+      if (bg1.classList.contains('active')) {
         bg2.style.backgroundImage = `url('${bg}')`;
-        bg2.style.opacity = "1";
-        bg1.style.opacity = "0";
-        activeLayer = 2;
+        bg2.classList.add('active');
+        bg1.classList.remove('active');
       } else {
         bg1.style.backgroundImage = `url('${bg}')`;
-        bg1.style.opacity = "1";
-        bg2.style.opacity = "0";
-        activeLayer = 1;
+        bg1.classList.add('active');
+        bg2.classList.remove('active');
       }
     }
   </script>
