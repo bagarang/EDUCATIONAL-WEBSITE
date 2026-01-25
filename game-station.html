@@ -53,11 +53,14 @@ body {
   gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
 }
 
-.game-row::-webkit-scrollbar { display: none; }
+.game-row::-webkit-scrollbar {
+  display: none;
+}
 
-/* TILE */
+/* GAME TILE */
 .game-tile {
   width: 120px;
   flex: 0 0 auto;
@@ -71,38 +74,114 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-/* THUMBNAILS */
+/* THEMATIC THUMBNAILS */
+.android {
+  background: linear-gradient(135deg, #3ddc84, #1a9f60);
+  color: #0b3d2e;
+  font-size: 40px;
+}
+
+.indonesia {
+  background: linear-gradient(to bottom, #e60012 50%, #ffffff 50%);
+  color: #000;
+  font-size: 28px;
+}
+
 .ps1 {
   background: #111;
   color: #fff;
   font-size: 26px;
 }
 
+.gba {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-size: 18px;
+}
+
+.nds {
+  background: linear-gradient(135deg, #222, #555);
+  color: #fff;
+  font-size: 16px;
+}
+
+.ps2 {
+  background: linear-gradient(135deg, #001f54, #003c8f);
+  color: #00b4ff;
+  font-size: 26px;
+}
+
+/* TITLE */
 .game-title {
   margin-top: 8px;
   font-size: 12px;
   text-align: center;
   color: var(--subtext);
 }
+
+/* RESPONSIVE */
+@media (min-width: 768px) {
+  .game-tile {
+    width: 140px;
+  }
+  .game-cover {
+    height: 140px;
+  }
+}
 </style>
 </head>
 
 <body>
+
 <div class="app">
 
   <div class="topbar">
+    <button onclick="goHome()">Home</button>
     <span>Game Station</span>
+    <button onclick="goBack()">Back</button>
   </div>
 
   <div class="game-row">
 
-    <!-- PLAYSTATION 1 -->
-    <div class="game-tile" onclick="openPS1()">
+    <!-- GAME 01 -->
+    <div class="game-tile" onclick="launchGame('https://www.crazygames.com')">
+      <div class="game-cover android">🤖</div>
+      <div class="game-title">CRAZYGAMES</div>
+    </div>
+
+    <!-- GAME 02 -->
+    <div class="game-tile" onclick="launchGame('https://poki.com/id')">
+      <div class="game-cover indonesia">🇮🇩</div>
+      <div class="game-title">POKI</div>
+    </div>
+
+    <!-- GAME 03 : PLAYSTATION 1 (LOCAL EMULATOR) -->
+    <div class="game-tile" onclick="goPS1()">
       <div class="game-cover ps1">PS&nbsp;1</div>
       <div class="game-title">PLAYSTATION 1</div>
+    </div>
+
+    <!-- GAME 04 -->
+    <div class="game-tile" onclick="launchGame('https://classicgamezone.com/gba-games')">
+      <div class="game-cover gba">GAME<br>BOY</div>
+      <div class="game-title">GAME BOY ADVANCE</div>
+    </div>
+
+    <!-- GAME 05 -->
+    <div class="game-tile" onclick="launchGame('https://classicgamezone.com/nds-games')">
+      <div class="game-cover nds">NINTENDO<br>DS</div>
+      <div class="game-title">NINTENDO DS</div>
+    </div>
+
+    <!-- GAME 06 -->
+    <div class="game-tile" onclick="launchGame('https://playretrogames.online/category/ps2/')">
+      <div class="game-cover ps2">PS&nbsp;2</div>
+      <div class="game-title">PLAYSTATION 2</div>
     </div>
 
   </div>
@@ -110,9 +189,23 @@ body {
 </div>
 
 <script>
-function openPS1() {
+function launchGame(url) {
+  window.open(url, '_blank');
+}
+
+function goHome() {
+  window.location.href = 'index.html';
+}
+
+function goBack() {
+  window.history.back();
+}
+
+/* KHUSUS PLAYSTATION 1 */
+function goPS1() {
   window.location.href = 'ps1-player.html';
 }
 </script>
+
 </body>
 </html>
