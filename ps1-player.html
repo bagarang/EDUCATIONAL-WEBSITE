@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS1 Player</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+#menu {
+  padding: 12px;
+  background: #111;
+}
+
+button {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#game {
+  width: 100%;
+  height: calc(100vh - 180px);
+}
+</style>
+</head>
+
+<body>
+
+<div id="menu">
+  <button onclick="loadGame('CTR/ctr.cue')">Crash Team Racing</button>
+  <button onclick="loadGame('JackieChan/jackiechan.cue')">Jackie Chan Stuntmaster</button>
+  <button onclick="loadGame('Tomba2/tomba2.cue')">Tomba 2</button>
+</div>
+
+<div id="game"></div>
+
+<script src="js/loader.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Game Station</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f4f4f4;
+  --text: #111;
+  --subtext: #666;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  padding: 14px 16px 24px;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.topbar span {
+  font-weight: 600;
+}
+
+.topbar button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* GAME ROW */
+.game-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.game-row::-webkit-scrollbar { display: none; }
+
+/* TILE */
+.game-tile {
+  width: 120px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.game-cover {
+  height: 120px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* THUMBNAILS */
+.ps1 {
+  background: #111;
+  color: #fff;
+  font-size: 26px;
+}
+
+.game-title {
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--subtext);
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <span>Game Station</span>
+  </div>
+
+  <div class="game-row">
+
+    <!-- PLAYSTATION 1 -->
+    <div class="game-tile" onclick="openPS1()">
+      <div class="game-cover ps1">PS&nbsp;1</div>
+      <div class="game-title">PLAYSTATION 1</div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function openPS1() {
+  window.location.href = 'ps1-player.html';
+}
+</script>
+</body>
+</html>
