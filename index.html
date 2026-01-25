@@ -11,8 +11,6 @@
     :root {
       --ps-light-blue: #00b4ff;
       --text-main: #ffffff;
-      --glass: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
       --radius: 14px;
     }
 
@@ -28,13 +26,12 @@
       overflow-y: auto;
     }
 
-    /* BACKGROUND SYSTEM - High Stability */
+    /* BACKGROUND SYSTEM - High Performance */
     #bg-container {
       position: fixed;
       inset: 0;
       z-index: -2;
       background: #000;
-      overflow: hidden;
     }
 
     .bg-layer {
@@ -42,10 +39,11 @@
       inset: 0;
       background-size: cover;
       background-position: center;
-      filter: brightness(0.3) saturate(1.1);
+      filter: brightness(0.25) saturate(1.1) blur(2px);
       transform: scale(1.05);
-      transition: opacity 0.5s ease-in-out; 
+      transition: opacity 0.4s ease-in-out;
       opacity: 0;
+      will-change: opacity;
     }
 
     .bg-layer.active {
@@ -56,8 +54,8 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 20% 30%, rgba(0, 67, 156, 0.25), transparent),
-                  linear-gradient(to top, rgba(5,8,15,1) 15%, rgba(5,8,15,0.4));
+      background: radial-gradient(circle at 20% 30%, rgba(0, 67, 156, 0.2), transparent),
+                  linear-gradient(to top, rgba(0,0,0,1) 15%, rgba(0,0,0,0.4));
       z-index: -1;
     }
 
@@ -114,7 +112,7 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       border-radius: var(--radius);
-      background: var(--glass);
+      background: rgba(255,255,255,0.1);
       backdrop-filter: blur(12px);
       border: 2px solid transparent;
       overflow: hidden;
@@ -145,7 +143,7 @@
 <body>
 
   <div id="bg-container">
-    <div id="bg1" class="bg-layer active" style="background-image:url('https://i.imgur.com/Le41ky8.png');"></div>
+    <div id="bg1" class="bg-layer active" style="background-image:url('https://i.imgur.com/Le41ky8h.png');"></div>
     <div id="bg2" class="bg-layer"></div>
   </div>
   <div class="overlay"></div>
@@ -157,37 +155,37 @@
     </div>
 
     <div class="rail">
-      <a class="game-card" href="game-cara-1-3.html" onmouseenter="setGame('https://i.imgur.com/Le41ky8.png','Game Cara Menggunakan Komputer 1–3','Game edukasi interaktif untuk siswa kelas 1 sampai 3 dalam mengenal dasar penggunaan komputer secara menyenangkan.')">
+      <a class="game-card" href="game-cara-1-3.html" onmouseenter="setGame('https://i.imgur.com/Le41ky8h.png','Game Cara Menggunakan Komputer 1–3','Game edukasi interaktif untuk siswa kelas 1 sampai 3 dalam mengenal dasar penggunaan komputer secara menyenangkan.')">
         <div class="thumb"><img src="https://i.imgur.com/22WXhNX.png"></div>
         <div class="thumb-title">Komputer 1–3</div>
       </a>
 
-      <a class="game-card" href="game-cara-4-6.html" onmouseenter="setGame('https://i.imgur.com/y9sK0Vm.png','Game Cara Menggunakan Komputer 4–6','Game edukasi untuk mengajarkan anak usia sekolah kelas 4 sampai 6 dalam memakai komputer pada tahap lanjutan, melatih kemandirian dan ketelitian penggunaan perangkat.')">
+      <a class="game-card" href="game-cara-4-6.html" onmouseenter="setGame('https://i.imgur.com/y9sK0Vmh.png','Game Cara Menggunakan Komputer 4–6','Game edukasi untuk mengajarkan anak usia sekolah kelas 4 sampai 6 dalam memakai komputer pada tahap lanjutan.')">
         <div class="thumb"><img src="https://i.imgur.com/22WXhNX.png"></div>
         <div class="thumb-title">Komputer 4–6</div>
       </a>
 
-      <a class="game-card" href="pokemon.html" onmouseenter="setGame('https://i.imgur.com/yaxWO7f.png','Pokemon Typing Game','Game bertema Pokemon untuk melatih kelincahan jari, koordinasi mata, dan konsentrasi dalam mengetik sekaligus membiasakan penggunaan keyboard dengan benar.')">
+      <a class="game-card" href="pokemon.html" onmouseenter="setGame('https://i.imgur.com/yaxWO7fh.png','Pokemon Typing Game','Game bertema Pokemon untuk melatih kelincahan jari, koordinasi mata, dan konsentrasi dalam mengetik.')">
         <div class="thumb"><img src="https://i.imgur.com/onhuyyV.png"></div>
         <div class="thumb-title">Pokemon Typing</div>
       </a>
 
-      <a class="game-card" href="tebakbendera.html" onmouseenter="setGame('https://i.imgur.com/yEqHloo.png','Tebak Bendera','Game edukasi untuk melatih pengetahuan geografi dan wawasan kebangsaan dengan cara menebak bendera negara secara interaktif dan menyenangkan.')">
+      <a class="game-card" href="tebakbendera.html" onmouseenter="setGame('https://i.imgur.com/yEqHlooh.png','Tebak Bendera','Game edukasi untuk melatih pengetahuan geografi dan wawasan kebangsaan dengan cara menebak bendera.')">
         <div class="thumb"><img src="https://i.imgur.com/CX0iLJL.png"></div>
         <div class="thumb-title">Tebak Bendera</div>
       </a>
 
-      <a class="game-card" href="math.html" onmouseenter="setGame('https://i.imgur.com/qvIRG2Y.png','Matematika Menyenangkan','Game matematika interaktif yang dirancang untuk melatih logika, kecepatan berpikir, dan kemampuan berhitung dasar hingga lanjutan dengan cara yang seru.')">
+      <a class="game-card" href="math.html" onmouseenter="setGame('https://i.imgur.com/qvIRG2Yh.png','Matematika Menyenangkan','Game matematika interaktif yang dirancang untuk melatih logika dan kecepatan berpikir.')">
         <div class="thumb"><img src="https://i.imgur.com/JsrDv1R.png"></div>
         <div class="thumb-title">Matematika</div>
       </a>
 
-      <a class="game-card" href="english.html" onmouseenter="setGame('https://i.imgur.com/E02T0tz.png','English Is Fun','Game pembelajaran bahasa Inggris yang membantu meningkatkan kosakata, pemahaman kata, dan kepercayaan diri anak dalam belajar bahasa asing.')">
+      <a class="game-card" href="english.html" onmouseenter="setGame('https://i.imgur.com/E02T0tzh.png','English Is Fun','Game pembelajaran bahasa Inggris yang membantu meningkatkan kosakata dan kepercayaan diri anak.')">
         <div class="thumb"><img src="https://i.imgur.com/U5kNwpl.png"></div>
         <div class="thumb-title">English Is Fun</div>
       </a>
 
-      <a class="game-card" href="game-station.html" onmouseenter="setGame('https://i.imgur.com/yiAtFhg.png','Game Station','Pusat permainan digital yang menyediakan berbagai game pilihan untuk hiburan dan eksplorasi, dikemas dalam satu launcher yang aman dan mudah digunakan.')">
+      <a class="game-card" href="game-station.html" onmouseenter="setGame('https://i.imgur.com/yiAtFhgh.png','Game Station','Pusat permainan digital yang menyediakan berbagai game pilihan untuk hiburan dan eksplorasi.')">
         <div class="thumb"><img src="https://i.imgur.com/8nTzRnC.png"></div>
         <div class="thumb-title">Game Station</div>
       </a>
@@ -195,28 +193,24 @@
   </div>
 
   <script>
-    // TRACKER UNTUK MENCEGAH RACE CONDITION
-    let latestRequestedImg = 'https://i.imgur.com/Le41ky8.png';
+    let latestRequestId = 0;
 
     function setGame(bg, title, desc) {
-      // 1. Validasi: Jangan proses jika mouse hanya bergeser sedikit di kartu yang sama
-      if (bg === latestRequestedImg) return;
-      latestRequestedImg = bg;
-
       const bg1 = document.getElementById('bg1');
       const bg2 = document.getElementById('bg2');
       const info = document.getElementById('info');
 
-      // 2. Update Teks: Instan (tanpa delay)
+      // Update Teks Instan
       info.innerHTML = `<h1>${title}</h1><p>${desc}</p>`;
 
-      // 3. Preload & Swap Logic
-      const tempImg = new Image();
-      tempImg.src = bg;
-      
-      tempImg.onload = function() {
-        // CEK TERPENTING: Hanya ganti background jika URL ini adalah hover TERAKHIR
-        if (bg !== latestRequestedImg) return;
+      // ID Permintaan Unik untuk setiap hover
+      const requestId = ++latestRequestId;
+
+      const img = new Image();
+      img.src = bg;
+      img.onload = () => {
+        // HANYA jalankan transisi jika ini adalah permintaan TERBARU
+        if (requestId !== latestRequestId) return;
 
         const activeLayer = bg1.classList.contains('active') ? bg1 : bg2;
         const inactiveLayer = bg1.classList.contains('active') ? bg2 : bg1;
