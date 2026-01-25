@@ -1,151 +1,141 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Game Station</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Game Station</title>
 
-  <!-- Web App Meta -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0a0a0a" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f4f4;
+  --text: #111;
+  --subtext: #666;
+  --radius: 14px;
+}
 
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --card: rgba(255,255,255,0.08);
-      --card-border: rgba(255,255,255,0.12);
-      --text: #ffffff;
-      --subtext: #b5b5b5;
-      --accent: #0a84ff;
-      --radius: 18px;
-    }
+* { box-sizing: border-box; }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
 
-    body {
-      margin: 0;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(180deg, #0a0a0a, #121212);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.app {
+  padding: 14px 16px 24px;
+}
 
-    .app {
-      width: 100%;
-      max-width: 420px;
-      padding: 16px 16px 28px;
-    }
+/* TOP BAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
 
-    /* Top Bar */
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+.topbar span {
+  font-weight: 600;
+}
 
-    .topbar button {
-      background: none;
-      border: none;
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-    }
+.topbar button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 
-    .topbar span {
-      font-size: 16px;
-      font-weight: 600;
-    }
+/* GAME ROW */
+.game-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+}
 
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+.game-row::-webkit-scrollbar {
+  display: none;
+}
 
-    .header h1 {
-      font-size: 22px;
-      margin: 0;
-    }
+/* GAME TILE */
+.game-tile {
+  width: 120px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
 
-    .header p {
-      font-size: 13px;
-      color: var(--subtext);
-      margin-top: 6px;
-    }
+.game-cover {
+  height: 120px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
 
-    /* Game Grid */
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
+/* THEMATIC THUMBNAILS */
+.android {
+  background: linear-gradient(135deg, #3ddc84, #1a9f60);
+  color: #0b3d2e;
+  font-size: 40px;
+}
 
-    .game-tile {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.15s ease;
-    }
+.indonesia {
+  background: linear-gradient(to bottom, #e60012 50%, #ffffff 50%);
+  color: #000;
+  font-size: 28px;
+}
 
-    .game-tile:active {
-      transform: scale(0.96);
-    }
+.ps1 {
+  background: #111;
+  color: #fff;
+  font-size: 26px;
+}
 
-    /* Thumbnail Default */
-    .game-thumb {
-      height: 110px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-      background: linear-gradient(135deg, #0a84ff, #5ac8fa);
-    }
+.gba {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-size: 18px;
+}
 
-    .game-meta {
-      padding: 10px 12px;
-    }
+.nds {
+  background: linear-gradient(135deg, #222, #555);
+  color: #fff;
+  font-size: 16px;
+}
 
-    .game-meta h2 {
-      font-size: 14px;
-      margin: 0 0 4px;
-    }
+.ps2 {
+  background: linear-gradient(135deg, #001f54, #003c8f);
+  color: #00b4ff;
+  font-size: 26px;
+}
 
-    .game-meta span {
-      font-size: 11px;
-      color: var(--subtext);
-    }
+/* TITLE */
+.game-title {
+  margin-top: 8px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--subtext);
+}
 
-    .footer {
-      margin-top: 28px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--subtext);
-    }
-
-    @media (min-width: 768px) {
-      .game-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-  </style>
+/* RESPONSIVE */
+@media (min-width: 768px) {
+  .game-tile {
+    width: 140px;
+  }
+  .game-cover {
+    height: 140px;
+  }
+}
+</style>
 </head>
+
 <body>
 
 <div class="app">
@@ -156,81 +146,58 @@
     <button onclick="goBack()">Back</button>
   </div>
 
-  <div class="header">
-    <h1>Game Station</h1>
-    <p>Pilih game untuk membuka di tab aman</p>
-  </div>
+  <div class="game-row">
 
-  <div class="game-grid">
-
+    <!-- GAME 01 -->
     <div class="game-tile" onclick="launchGame('https://www.crazygames.com')">
-      <div class="game-thumb">CRAZYGAMES</div>
-      <div class="game-meta">
-        <h2>GAME 01</h2>
-        <span>CrazyGames Platform</span>
-      </div>
+      <div class="game-cover android">🤖</div>
+      <div class="game-title">CRAZYGAMES</div>
     </div>
 
+    <!-- GAME 02 -->
     <div class="game-tile" onclick="launchGame('https://poki.com/id')">
-      <div class="game-thumb">POKI</div>
-      <div class="game-meta">
-        <h2>GAME 02</h2>
-        <span>Poki Games Indonesia</span>
-      </div>
+      <div class="game-cover indonesia">🇮🇩</div>
+      <div class="game-title">POKI</div>
     </div>
 
+    <!-- GAME 03 -->
     <div class="game-tile" onclick="launchGame('https://classicgamezone.com/ps-games')">
-      <div class="game-thumb">PLAYSTATION 1</div>
-      <div class="game-meta">
-        <h2>GAME 03</h2>
-        <span>Playstation 01</span>
-      </div>
+      <div class="game-cover ps1">PS&nbsp;1</div>
+      <div class="game-title">PLAYSTATION 1</div>
     </div>
 
+    <!-- GAME 04 -->
     <div class="game-tile" onclick="launchGame('https://classicgamezone.com/gba-games')">
-      <div class="game-thumb">GAME BOY ADVANCE</div>
-      <div class="game-meta">
-        <h2>GAME 04</h2>
-        <span>Game Boy Advance</span>
-      </div>
+      <div class="game-cover gba">GAME<br>BOY</div>
+      <div class="game-title">GAME BOY ADVANCE</div>
     </div>
 
+    <!-- GAME 05 -->
     <div class="game-tile" onclick="launchGame('https://classicgamezone.com/nds-games')">
-      <div class="game-thumb">NINTENDO DS</div>
-      <div class="game-meta">
-        <h2>GAME 05</h2>
-        <span>Nintendo DS</span>
-      </div>
+      <div class="game-cover nds">NINTENDO<br>DS</div>
+      <div class="game-title">NINTENDO DS</div>
     </div>
 
+    <!-- GAME 06 -->
     <div class="game-tile" onclick="launchGame('https://playretrogames.online/category/ps2/')">
-      <div class="game-thumb">PLAYSTATION 2</div>
-      <div class="game-meta">
-        <h2>GAME 06</h2>
-        <span>Playstation 2</span>
-      </div>
+      <div class="game-cover ps2">PS&nbsp;2</div>
+      <div class="game-title">PLAYSTATION 2</div>
     </div>
 
-  </div>
-
-  <div class="footer">
-    External games open in a secure new tab
   </div>
 
 </div>
 
 <script>
-  function launchGame(url) {
-    window.open(url, '_blank');
-  }
-
-  function goHome() {
-    window.location.href = 'index.html';
-  }
-
-  function goBack() {
-    window.history.back();
-  }
+function launchGame(url) {
+  window.open(url, '_blank');
+}
+function goHome() {
+  window.location.href = 'index.html';
+}
+function goBack() {
+  window.history.back();
+}
 </script>
 
 </body>
