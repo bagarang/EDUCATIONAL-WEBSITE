@@ -28,7 +28,7 @@
       overflow-y: auto;
     }
 
-    /* BACKGROUND SYSTEM - Menggunakan Layering untuk kepastian transisi */
+    /* BACKGROUND SYSTEM */
     #bg-container {
       position: fixed;
       inset: 0;
@@ -43,12 +43,14 @@
       background-position: center;
       filter: brightness(0.3) saturate(1.2);
       transform: scale(1.05);
-      transition: opacity 0.6s ease-in-out;
+      /* Transisi dipercepat (0.4s) agar terasa lebih responsif */
+      transition: opacity 0.4s ease-in-out; 
       opacity: 0;
     }
 
     .bg-layer.active {
       opacity: 1;
+      z-index: -1; /* Layer aktif selalu di depan layer yang sedang memudar */
     }
 
     .overlay {
@@ -84,6 +86,7 @@
       font-size: 16px;
       line-height: 1.6;
       color: rgba(255, 255, 255, 0.8);
+      transition: opacity 0.2s;
     }
 
     .rail {
@@ -194,29 +197,37 @@
 
   <script>
     let currentImage = 'https://i.imgur.com/Le41ky8.png';
+    let isTransitioning = false;
 
     function setGame(bg, title, desc) {
-      // Jika kursor bergerak di thumbnail yang sama, jangan lakukan apa-apa (Mencegah Bug Flicker)
       if (bg === currentImage) return;
+      currentImage = bg;
 
       const bg1 = document.getElementById('bg1');
       const bg2 = document.getElementById('bg2');
       const info = document.getElementById('info');
 
-      // Update Teks
-      info.innerHTML = `<h1>${title}</h1><p>${desc}</p>`;
-      currentImage = bg;
+      // Update Teks Segera (agar terasa responsif)
+      info.style.opacity = "0.5";
+      setTimeout(() => {
+        info.innerHTML = `<h1>${title}</h1><p>${desc}</p>`;
+        info.style.opacity = "1";
+      }, 200);
 
-      // Logika Swap Layer yang Pasti Berhasil
-      if (bg1.classList.contains('active')) {
-        bg2.style.backgroundImage = `url('${bg}')`;
-        bg2.classList.add('active');
-        bg1.classList.remove('active');
-      } else {
-        bg1.style.backgroundImage = `url('${bg}')`;
-        bg1.classList.add('active');
-        bg2.classList.remove('active');
-      }
+      // PRELOAD LOGIC: Memastikan gambar sudah siap sebelum transisi
+      const imgPreload = new Image();
+      imgPreload.src = bg;
+      imgPreload.onload = () => {
+        if (bg1.classList.contains('active')) {
+          bg2.style.backgroundImage = `url('${bg}')`;
+          bg2.classList.add('active');
+          bg1.classList.remove('active');
+        } else {
+          bg1.style.backgroundImage = `url('${bg}')`;
+          bg1.classList.add('active');
+          bg2.classList.remove('active');
+        }
+      };
     }
   </script>
 
