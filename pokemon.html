@@ -302,7 +302,10 @@
         {id:12, name:"Butterfree"}, {id:16, name:"Pidgey"}, {id:25, name:"Pikachu"}, {id:35, name:"Clefairy"}, 
         {id:37, name:"Vulpix"}, {id:39, name:"Jigglypuff"}, {id:43, name:"Oddish"}, {id:50, name:"Diglett"}, 
         {id:52, name:"Meowth"}, {id:54, name:"Psyduck"}, {id:58, name:"Growlithe"}, {id:63, name:"Abra"}, 
-        {id:66, name:"Machop"}, {id:133, name:"Eevee"}, {id:143, name:"Snorlax"}, {id:150, name:"Mewtwo"}
+        {id:66, name:"Machop"}, {id:133, name:"Eevee"}, {id:143, name:"Snorlax"}, {id:150, name:"Mewtwo"},
+        // BUG FIX: Tambah lebih banyak Pokemon untuk variety di semua level
+        {id:26, name:"Raichu"}, {id:27, name:"Sandshrew"}, {id:28, name:"Sandslash"}, {id:29, name:"Nidoran"},
+        {id:94, name:"Gengar"}, {id:6, name:"Charizard"}, {id:9, name:"Blastoise"}, {id:3, name:"Venusaur"}
     ];
 
     const CONFIG = { maxLevels: 10, stagesPerLevel: 3, wordsPerStage: 10, timeLimit: 180 };
@@ -310,7 +313,8 @@
     let state = {
         playerName: "", currentLevel: 1, currentStage: 1, unlockedLevel: 1,
         score: 0, timeRemaining: 180, wordIndex: 0, currentWordObj: null,
-        typedIndex: 0, isPlaying: false, timerInterval: null, stageWords: []
+        typedIndex: 0, isPlaying: false, timerInterval: null, stageWords: [],
+        scoreSaved: false // BUG FIX: Flag untuk mencegah save skor berkali-kali
     };
 
     const els = {
@@ -336,7 +340,8 @@
         finalLevelScore: document.getElementById('final-level-score'),
         leaderboardBody: document.getElementById('leaderboard-body'),
         gameContainer: document.getElementById('game-container'),
-        bgMusic: document.getElementById('bg-music')
+        bgMusic: document.getElementById('bg-music'),
+        btnNextStage: document.getElementById('btn-next-stage')
     };
 
     function init() {
@@ -345,6 +350,11 @@
         const savedLevel = localStorage.getItem('pkmnUnlockedLevel');
         if (savedLevel) state.unlockedLevel = parseInt(savedLevel);
         updateLeaderboardUI();
+        
+        // BUG FIX: Auto-focus hidden input untuk mobile/touch
+        document.addEventListener('click', () => {
+            if (state.isPlaying) els.hiddenInput.focus();
+        });
     }
 
     function submitName() {
@@ -354,9 +364,11 @@
         localStorage.setItem('pkmnPlayerName', state.playerName);
         els.introScreen.classList.add('hidden');
         
-        // Play Music on start (Browser policy requires interaction)
+        // BUG FIX: Error handling untuk audio
         els.bgMusic.volume = 0.3;
-        els.bgMusic.play();
+        els.bgMusic.play().catch(err => {
+            console.log('Audio autoplay blocked:', err);
+        });
 
         showLevelSelect();
     }
@@ -393,22 +405,22 @@
         state.wordIndex = 0;
         state.isPlaying = true;
         state.typedIndex = 0;
+        state.scoreSaved = false; // BUG FIX: Reset flag
 
-        // --- IMPROVEMENT: DIFFICULTY FILTERING ---
+        // BUG FIX: DIFFICULTY FILTERING dengan fallback lebih baik
         let filteredPool = [];
         if (state.currentLevel <= 3) {
-            // Easy: 1-5 letters
-            filteredPool = allPokemon.filter(p => p.name.length <= 5);
+            filteredPool = allPokemon.filter(p => p.name.length <= 6);
         } else if (state.currentLevel <= 7) {
-            // Medium: 6-8 letters
-            filteredPool = allPokemon.filter(p => p.name.length > 5 && p.name.length <= 8);
+            filteredPool = allPokemon.filter(p => p.name.length >= 6 && p.name.length <= 9);
         } else {
-            // Hard: > 8 letters
-            filteredPool = allPokemon.filter(p => p.name.length > 8);
+            filteredPool = allPokemon.filter(p => p.name.length >= 7);
         }
 
-        // Fallback if pool is too small
-        if (filteredPool.length < 5) filteredPool = [...allPokemon];
+        // BUG FIX: Jika pool kurang, ambil dari semua pokemon
+        if (filteredPool.length < CONFIG.wordsPerStage) {
+            filteredPool = [...allPokemon];
+        }
 
         state.stageWords = filteredPool.sort(() => 0.5 - Math.random()).slice(0, CONFIG.wordsPerStage);
         
@@ -420,7 +432,7 @@
         els.progressDots.innerHTML = '';
         for(let i=0; i<CONFIG.wordsPerStage; i++) {
             const dot = document.createElement('div');
-            dot.style.cssText = "width:15px; height:15px; border-radius:50%; background:#ccc;";
+            dot.className = 'dot';
             els.progressDots.appendChild(dot);
         }
 
@@ -438,6 +450,7 @@
         els.pokemonImg.style.display = 'block';
         els.pokemonImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${state.currentWordObj.id}.png`;
         renderWord();
+        updateDots(); // BUG FIX: Update dots saat load word baru
     }
 
     function renderWord() {
@@ -466,7 +479,7 @@
                 loadWord();
             }
         } else {
-            // IMPROVEMENT: Getar HANYA saat salah
+            // Getar HANYA saat salah
             state.score = Math.max(0, state.score - 5);
             els.gameContainer.classList.add('shake');
             setTimeout(() => els.gameContainer.classList.remove('shake'), 300);
@@ -477,7 +490,13 @@
     function updateDots() {
         const dots = els.progressDots.children;
         for (let i = 0; i < dots.length; i++) {
-            dots[i].style.background = (i < state.wordIndex) ? "var(--ui-green)" : "#ccc";
+            if (i < state.wordIndex) {
+                dots[i].className = 'dot done';
+            } else if (i === state.wordIndex) {
+                dots[i].className = 'dot active';
+            } else {
+                dots[i].className = 'dot';
+            }
         }
     }
 
@@ -494,8 +513,11 @@
     }
 
     function quitGame() {
-        if (confirm("Keluar dan simpan skor terakhir?")) {
-            saveScore(state.score); // Simpan skor sebelum Quit
+        if (confirm("Keluar ke menu? Skor akan disimpan.")) {
+            if (!state.scoreSaved && state.score > 0) {
+                saveScore(state.score);
+                state.scoreSaved = true;
+            }
             state.isPlaying = false;
             clearInterval(state.timerInterval);
             showLevelSelect();
@@ -507,11 +529,18 @@
         clearInterval(state.timerInterval);
         
         if (state.currentStage === CONFIG.stagesPerLevel) {
-            saveScore(state.score); // Simpan skor saat Level Berakhir (Stage 3)
+            // Simpan skor saat Level Berakhir
+            if (!state.scoreSaved) {
+                saveScore(state.score);
+                state.scoreSaved = true;
+            }
             triggerEvolutionSequence();
         } else {
+            els.resultTitle.innerText = "STAGE CLEAR!";
             els.resultOverlay.classList.remove('hidden');
             els.resultScore.innerText = state.score;
+            // BUG FIX: Tampilkan tombol Next
+            els.btnNextStage.style.display = 'inline-block';
         }
     }
 
@@ -531,21 +560,28 @@
     }
 
     function endStage(isWin) {
-        saveScore(state.score); // Simpan skor saat Waktu Habis
         state.isPlaying = false;
         clearInterval(state.timerInterval);
+        
+        // BUG FIX: Simpan skor hanya sekali saat waktu habis
+        if (!state.scoreSaved) {
+            saveScore(state.score);
+            state.scoreSaved = true;
+        }
+        
         els.resultOverlay.classList.remove('hidden');
         els.resultTitle.innerText = "WAKTU HABIS!";
         els.resultScore.innerText = state.score;
+        
+        // BUG FIX: Sembunyikan tombol Next saat timeout, hanya tampilkan Retry
+        els.btnNextStage.style.display = 'none';
     }
 
-    // --- IMPROVEMENT: LEADERBOARD LOGIC ---
     function saveScore(score) {
         if (score <= 0 || !state.playerName) return;
         let lbData = localStorage.getItem('pkmnLeaderboard');
         let lb = lbData ? JSON.parse(lbData) : [];
         
-        // Simpan setiap percobaan unik dengan timestamp
         lb.push({ 
             name: state.playerName, 
             level: state.currentLevel, 
@@ -553,7 +589,6 @@
             date: new Date().toLocaleString() 
         });
         
-        // Sortir skor tertinggi
         lb.sort((a,b) => b.score - a.score);
         localStorage.setItem('pkmnLeaderboard', JSON.stringify(lb.slice(0, 10)));
         updateLeaderboardUI();
@@ -571,13 +606,40 @@
         els.leaderboardOverlay.classList.remove('hidden');
     }
 
-    function nextStageAction() { state.currentStage++; startStage(); }
-    function retryStageAction() { startStage(); }
-    function goToNextLevel() { state.currentLevel++; startLevel(state.currentLevel); }
+    function nextStageAction() { 
+        state.currentStage++; 
+        state.scoreSaved = false; // Reset flag untuk stage baru
+        startStage(); 
+    }
+    
+    function retryStageAction() { 
+        state.scoreSaved = false; // Reset flag
+        startStage(); 
+    }
+    
+    function goToNextLevel() { 
+        state.currentLevel++; 
+        state.scoreSaved = false; // Reset flag
+        startLevel(state.currentLevel); 
+    }
+    
     function backToMenuFromResult() { showLevelSelect(); }
 
+    // BUG FIX: Improved keyboard handling
     document.addEventListener('keydown', (e) => { 
-        if(state.isPlaying && e.key.length === 1 && !e.ctrlKey) handleInput(e.key); 
+        if(state.isPlaying && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            handleInput(e.key);
+        }
+    });
+    
+    // BUG FIX: Mobile input support
+    els.hiddenInput.addEventListener('input', (e) => {
+        if (state.isPlaying && e.target.value) {
+            const char = e.target.value[e.target.value.length - 1];
+            handleInput(char);
+            e.target.value = ''; // Clear input
+        }
     });
     
     init();
