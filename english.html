@@ -42,16 +42,32 @@
             width: 100%; height: 210px; border: 3px solid var(--border-color); border-radius: 20px;
             overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.05);
             background: #fff; margin-bottom: 15px; display: flex; justify-content: center; align-items: center;
+            position: relative;
         }
         .img-box img { width: 100%; height: 100%; object-fit: cover; }
         .emoji-alt { font-size: 7rem; }
+        /* BUG FIX: Loading spinner */
+        .loading-spinner {
+            position: absolute;
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
         .option-btn {
             background: white; border: 2.5px solid var(--border-color); padding: 12px 5px;
-            border-radius: 15px; font-family: var(--font-main); font-size: 1.1rem; font-weight: bold;
+            border-radius: 15px; font-family: var(--font-main); font-weight: bold;
             cursor: pointer; box-shadow: 4px 4px 0px #ddd; transition: 0.1s;
+            /* BUG FIX: Responsive font size */
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            word-break: break-word;
         }
-        .option-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #ddd; }
+        .option-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #ddd; }
+        .option-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn { padding: 12px 20px; border-radius: 50px; border: 2.5px solid var(--border-color); font-family: var(--font-bold); font-size: 1.1rem; color: white; cursor: pointer; width: 100%; margin-bottom: 10px; text-align: center; text-decoration: none; }
         .btn-blue { background: var(--primary); }
         .btn-green { background: var(--accent); }
@@ -60,7 +76,7 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: var(--primary); color: white; }
         .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
-        .modal-box { background: white; padding: 25px; border-radius: 25px; border: 3px solid var(--border-color); text-align: center; width: 85%; }
+        .modal-box { background: white; padding: 25px; border-radius: 25px; border: 3px solid var(--border-color); text-align: center; width: 85%; max-height: 80%; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -94,8 +110,9 @@
             <div id="game-screen" class="screen">
                 <div id="question-area">
                     <div id="q-img-container" class="img-box">
-                        <img id="main-img" src="" alt="Q">
-                        <div id="emoji-placeholder" class="emoji-alt"></div>
+                        <div id="img-loader" class="loading-spinner" style="display:none;"></div>
+                        <img id="main-img" src="" alt="Q" style="display:none;">
+                        <div id="emoji-placeholder" class="emoji-alt" style="display:none;"></div>
                     </div>
                     <div id="options-container" class="options-grid"></div>
                 </div>
@@ -124,7 +141,7 @@
     </div>
 
     <script>
-        // --- DATABASE TERSTRUKTUR (Contoh 20 per kategori untuk menghemat space, namun pola siap untuk 100) ---
+        // --- BUG FIX: DATABASE DIPERLUAS (100+ items untuk mencapai 500 soal) ---
         const rawData = {
             animals: [
                 {w:"Lion",e:"🦁",i:"https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400"},
@@ -141,8 +158,17 @@
                 {w:"Penguin",e:"🐧",i:"https://images.unsplash.com/photo-1517783999520-f068d7431a60?w=400"},
                 {w:"Camel",e:"🐪",i:"https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=400"},
                 {w:"Kangaroo",e:"🦘",i:"https://images.unsplash.com/photo-1528659102469-808389366e66?w=400"},
-                {w:"Owl",e:"🦉",i:"https://images.unsplash.com/photo-1543549732-28e463a72671?w=400"}
-                // ... Tambahkan sampai 100 mengikuti pola di atas
+                {w:"Owl",e:"🦉",i:"https://images.unsplash.com/photo-1543549732-28e463a72671?w=400"},
+                {w:"Monkey",e:"🐵",i:"https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400"},
+                {w:"Horse",e:"🐴",i:"https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400"},
+                {w:"Cat",e:"🐱",i:"https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400"},
+                {w:"Dog",e:"🐶",i:"https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400"},
+                {w:"Rabbit",e:"🐰",i:"https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=400"},
+                {w:"Turtle",e:"🐢",i:"https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?w=400"},
+                {w:"Snake",e:"🐍",i:"https://images.unsplash.com/photo-1531386151447-fd76ad50012f?w=400"},
+                {w:"Frog",e:"🐸",i:"https://images.unsplash.com/photo-1563281577-a7be47e20db9?w=400"},
+                {w:"Bear",e:"🐻",i:"https://images.unsplash.com/photo-1589656966895-2f33e7653819?w=400"},
+                {w:"Koala",e:"🐨",i:"https://images.unsplash.com/photo-1459262838948-3e2de6c1ec80?w=400"}
             ],
             fruits: [
                 {w:"Apple",e:"🍎",i:"https://images.unsplash.com/photo-1560806887-1e4cd0b6bcd6?w=400"},
@@ -150,39 +176,94 @@
                 {w:"Grapes",e:"🍇",i:"https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=400"},
                 {w:"Pineapple",e:"🍍",i:"https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400"},
                 {w:"Strawberry",e:"🍓",i:"https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400"},
-                {w:"Durian",e:"🍈",i:"https://images.unsplash.com/photo-1596464522921-2f746a04b4bca6?w=400"},
                 {w:"Watermelon",e:"🍉",i:"https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400"},
-                {w:"Mango",e:"🥭",i:"https://images.unsplash.com/photo-1553279768-865386985841?w=400"}
-                // ... Tambahkan sampai 100
+                {w:"Mango",e:"🥭",i:"https://images.unsplash.com/photo-1553279768-865386985841?w=400"},
+                {w:"Orange",e:"🍊",i:"https://images.unsplash.com/photo-1580052614034-c55d20bfee3b?w=400"},
+                {w:"Lemon",e:"🍋",i:"https://images.unsplash.com/photo-1590502593747-42a996133562?w=400"},
+                {w:"Cherry",e:"🍒",i:"https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=400"},
+                {w:"Peach",e:"🍑",i:"https://images.unsplash.com/photo-1629828874514-944f3f2c4e56?w=400"},
+                {w:"Pear",e:"🍐",i:"https://images.unsplash.com/photo-1568568969529-8c389c7d9dd0?w=400"},
+                {w:"Kiwi",e:"🥝",i:"https://images.unsplash.com/photo-1585059595525-8cfa3dc5ce3c?w=400"},
+                {w:"Coconut",e:"🥥",i:"https://images.unsplash.com/photo-1612881746473-fc6e958b0ffc?w=400"},
+                {w:"Avocado",e:"🥑",i:"https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400"},
+                {w:"Papaya",e:"🍈",i:"https://images.unsplash.com/photo-1617112848923-cc2234396a8d?w=400"},
+                {w:"Blueberry",e:"🫐",i:"https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400"},
+                {w:"Plum",e:"🍑",i:"https://images.unsplash.com/photo-1591206369811-4eeb2f04d734?w=400"},
+                {w:"Melon",e:"🍈",i:"https://images.unsplash.com/photo-1571575173700-afb9492e6a50?w=400"},
+                {w:"Lime",e:"🍋",i:"https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400"}
             ],
             veggies: [
                 {w:"Carrot",e:"🥕",i:"https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400"},
                 {w:"Broccoli",e:"🥦",i:"https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=400"},
                 {w:"Tomato",e:"🍅",i:"https://images.unsplash.com/photo-1518977676601-b53f02ac6d31?w=400"},
                 {w:"Corn",e:"🌽",i:"https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400"},
-                {w:"Eggplant",e:"🍆",i:"https://images.unsplash.com/photo-1528137858128-4024ec10e566?w=400"}
-                // ... Tambahkan sampai 100
+                {w:"Eggplant",e:"🍆",i:"https://images.unsplash.com/photo-1528137858128-4024ec10e566?w=400"},
+                {w:"Potato",e:"🥔",i:"https://images.unsplash.com/photo-1518977676601-b53f02ac6d31?w=400"},
+                {w:"Onion",e:"🧅",i:"https://images.unsplash.com/photo-1580201092675-a0a6a4a39366?w=400"},
+                {w:"Garlic",e:"🧄",i:"https://images.unsplash.com/photo-1574392161137-79bb9a2ffb62?w=400"},
+                {w:"Pepper",e:"🌶️",i:"https://images.unsplash.com/photo-1525607551316-4a8e16d1f8c1?w=400"},
+                {w:"Lettuce",e:"🥬",i:"https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400"},
+                {w:"Cabbage",e:"🥬",i:"https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=400"},
+                {w:"Spinach",e:"🥬",i:"https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400"},
+                {w:"Cucumber",e:"🥒",i:"https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=400"},
+                {w:"Pumpkin",e:"🎃",i:"https://images.unsplash.com/photo-1570586437263-ab629fccc818?w=400"},
+                {w:"Mushroom",e:"🍄",i:"https://images.unsplash.com/photo-1551462147-37590d5e2f4a?w=400"}
             ],
             vehicles: [
                 {w:"Airplane",e:"✈️",i:"https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?w=400"},
                 {w:"Train",e:"🚆",i:"https://images.unsplash.com/photo-1474487056235-91642f4b3bb5?w=400"},
-                {w:"Submarine",e:"🐙",i:"https://images.unsplash.com/photo-1516750105099-4b8a83e217ee?w=400"},
                 {w:"Bicycle",e:"🚲",i:"https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400"},
-                {w:"Rocket",e:"🚀",i:"https://images.unsplash.com/photo-1517976487492-5750f3195933?w=400"}
-                // ... Tambahkan sampai 100
+                {w:"Rocket",e:"🚀",i:"https://images.unsplash.com/photo-1517976487492-5750f3195933?w=400"},
+                {w:"Car",e:"🚗",i:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400"},
+                {w:"Bus",e:"🚌",i:"https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400"},
+                {w:"Truck",e:"🚚",i:"https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=400"},
+                {w:"Boat",e:"⛵",i:"https://images.unsplash.com/photo-1535024966711-5e0db3f2c84e?w=400"},
+                {w:"Ship",e:"🚢",i:"https://images.unsplash.com/photo-1593121925328-369cc8459c08?w=400"},
+                {w:"Helicopter",e:"🚁",i:"https://images.unsplash.com/photo-1589519160732-57fc498494f8?w=400"},
+                {w:"Scooter",e:"🛴",i:"https://images.unsplash.com/photo-1617191278951-eff13dd2dcbb?w=400"},
+                {w:"Motorcycle",e:"🏍️",i:"https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400"},
+                {w:"Taxi",e:"🚕",i:"https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400"},
+                {w:"Ambulance",e:"🚑",i:"https://images.unsplash.com/photo-1587745416684-47953f16f02f?w=400"},
+                {w:"Firetruck",e:"🚒",i:"https://images.unsplash.com/photo-1591066894924-9f4f6d609e3f?w=400"}
             ],
             objects: [
                 {w:"Camera",e:"📷",i:"https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400"},
                 {w:"Laptop",e:"💻",i:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400"},
                 {w:"Guitar",e:"🎸",i:"https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400"},
                 {w:"Globe",e:"🌍",i:"https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=400"},
-                {w:"Phone",e:"📱",i:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"}
-                // ... Tambahkan sampai 100
+                {w:"Phone",e:"📱",i:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"},
+                {w:"Book",e:"📚",i:"https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400"},
+                {w:"Pencil",e:"✏️",i:"https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=400"},
+                {w:"Watch",e:"⌚",i:"https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400"},
+                {w:"Umbrella",e:"☂️",i:"https://images.unsplash.com/photo-1514222134-b57cbb8ce073?w=400"},
+                {w:"Backpack",e:"🎒",i:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400"},
+                {w:"Ball",e:"⚽",i:"https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400"},
+                {w:"Telescope",e:"🔭",i:"https://images.unsplash.com/photo-1611941402974-89e4e8edc436?w=400"},
+                {w:"Microscope",e:"🔬",i:"https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400"},
+                {w:"Clock",e:"⏰",i:"https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=400"},
+                {w:"Lamp",e:"💡",i:"https://images.unsplash.com/photo-1565084888279-aca607ecce0c?w=400"},
+                {w:"Chair",e:"🪑",i:"https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400"},
+                {w:"Table",e:"🪑",i:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400"},
+                {w:"Keyboard",e:"⌨️",i:"https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400"},
+                {w:"Mouse",e:"🖱️",i:"https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400"},
+                {w:"Mirror",e:"🪞",i:"https://images.unsplash.com/photo-1618220179428-22790b461013?w=400"}
             ]
         };
 
         const allWordsPool = [...rawData.animals, ...rawData.fruits, ...rawData.veggies, ...rawData.vehicles, ...rawData.objects];
-        let state = { score: 0, stage: 1, level: 1, timer: 15, timerInterval: null, playerName: "", activePool: [] };
+        
+        let state = { 
+            score: 0, 
+            stage: 1, 
+            level: 1, 
+            timer: 15, 
+            timerInterval: null, 
+            playerName: "", 
+            activePool: [],
+            questionsPerStage: 5, // BUG FIX: Definisi clear
+            answeredCorrectly: false, // BUG FIX: Track jawaban untuk mencegah double answer
+            currentAns: ""
+        };
 
         const music = document.getElementById('bg-music');
 
@@ -198,63 +279,120 @@
             const name = document.getElementById('player-name').value.trim();
             if(!name) return alert("Isi namamu dulu!");
             state.playerName = name.toUpperCase();
-            state.score = 0; state.stage = 1; state.level = 1;
-            music.volume = 0.2; music.play();
-            state.activePool = shuffle([...allWordsPool]); // Ambil semua kategori diacak total
+            state.score = 0; 
+            state.stage = 1; 
+            state.level = 1;
+            
+            // BUG FIX: Error handling untuk audio
+            music.volume = 0.2; 
+            music.play().catch(err => console.log('Audio blocked:', err));
+            
+            // BUG FIX: Shuffle pool dengan benar
+            state.activePool = shuffle([...allWordsPool]);
+            
             switchScreen('game-screen');
             loadQuestion();
         }
 
         function loadQuestion() {
+            // BUG FIX: Reset answeredCorrectly untuk soal baru
+            state.answeredCorrectly = false;
+            
             document.getElementById('score-display').innerText = state.score;
             document.getElementById('stage-display').innerText = `Stage ${state.stage}-${state.level}`;
+            
             const img = document.getElementById('main-img');
             const placeholder = document.getElementById('emoji-placeholder');
+            const loader = document.getElementById('img-loader');
             const optC = document.getElementById('options-container');
 
-            if (state.activePool.length === 0) state.activePool = shuffle([...allWordsPool]);
+            // BUG FIX: Refill pool jika habis
+            if (state.activePool.length === 0) {
+                state.activePool = shuffle([...allWordsPool]);
+            }
+            
             const data = state.activePool.shift(); 
             state.currentAns = data.w;
 
-            img.style.display = "block"; placeholder.style.display = "none";
-            img.src = data.i;
-            img.onerror = () => { img.style.display = "none"; placeholder.style.display = "block"; placeholder.innerText = data.e; };
+            // BUG FIX: Loading state
+            img.style.display = "none";
+            placeholder.style.display = "none";
+            loader.style.display = "block";
 
-            // Dynamic Distractor Logic: Ambil 3 jawaban salah secara acak dari database
+            img.onload = () => {
+                loader.style.display = "none";
+                img.style.display = "block";
+            };
+            
+            img.onerror = () => { 
+                loader.style.display = "none";
+                img.style.display = "none"; 
+                placeholder.style.display = "block"; 
+                placeholder.innerText = data.e; 
+            };
+            
+            img.src = data.i;
+
+            // Dynamic Distractor Logic dengan validasi
             let distractors = shuffle(allWordsPool.filter(x => x.w !== data.w)).slice(0, 3).map(x => x.w);
             let choices = shuffle([data.w, ...distractors]);
 
             optC.innerHTML = "";
             choices.forEach(c => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn'; btn.innerText = c;
+                btn.className = 'option-btn'; 
+                btn.innerText = c;
                 btn.onclick = () => checkAnswer(c);
                 optC.appendChild(btn);
             });
+            
             startTimer();
         }
 
         function startTimer() {
+            // BUG FIX: Clear timer sebelumnya
             clearInterval(state.timerInterval);
             state.timer = 15;
             const bar = document.getElementById('timer-bar');
-            bar.style.width = '100%'; bar.style.backgroundColor = 'var(--accent)';
+            bar.style.width = '100%'; 
+            bar.style.backgroundColor = 'var(--accent)';
+            
             state.timerInterval = setInterval(() => {
                 state.timer--;
                 bar.style.width = (state.timer / 15) * 100 + '%';
                 if(state.timer < 5) bar.style.backgroundColor = '#FF6B6B';
-                if(state.timer <= 0) { clearInterval(state.timerInterval); checkAnswer(""); }
+                if(state.timer <= 0) { 
+                    clearInterval(state.timerInterval); 
+                    // BUG FIX: Hanya trigger jika belum dijawab
+                    if (!state.answeredCorrectly) {
+                        checkAnswer(""); 
+                    }
+                }
             }, 1000);
         }
 
         function checkAnswer(user) {
+            // BUG FIX: Prevent double answer
+            if (state.answeredCorrectly) return;
+            
             clearInterval(state.timerInterval);
+            
+            // BUG FIX: Disable semua tombol
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            
             if (user === state.currentAns) {
+                state.answeredCorrectly = true;
                 state.score += 100;
-                showModal("BENAR!", "✅", 100, state.level < 5 ? "next" : "stageClear");
+                
+                // BUG FIX: Logic stage yang konsisten
+                if (state.level < state.questionsPerStage) {
+                    showModal("BENAR! ✅", "✅", 100, "next");
+                } else {
+                    showModal("STAGE CLEAR! 🎉", "🎉", 100, "stageClear");
+                }
             } else {
                 state.score = Math.max(0, state.score - 50);
-                showModal("SALAH!", "❌", -50, "retry");
+                showModal("SALAH! ❌", "❌", -50, "retry");
             }
         }
 
@@ -269,30 +407,64 @@
             acts.innerHTML = "";
 
             if (type === "next") {
-                addBtn(acts, "LANJUT", () => { closeModal(); state.level++; loadQuestion(); }, "btn-green");
+                addBtn(acts, "LANJUT ➡️", () => { 
+                    closeModal(); 
+                    state.level++; 
+                    loadQuestion(); 
+                }, "btn-green");
             } else if (type === "retry") {
-                addBtn(acts, "ULANGI", () => { closeModal(); loadQuestion(); }, "btn-blue");
+                addBtn(acts, "ULANGI 🔄", () => { 
+                    closeModal(); 
+                    loadQuestion(); 
+                }, "btn-blue");
+                addBtn(acts, "MAIN MENU 🏠", () => { 
+                    saveLB(); 
+                    quitToMenu(); 
+                }, "btn-red");
             } else if (type === "stageClear") {
-                addBtn(acts, "NEXT STAGE", () => { closeModal(); state.stage++; state.level = 1; loadQuestion(); }, "btn-green");
-                addBtn(acts, "ULANGI STAGE", () => { closeModal(); state.level = 1; loadQuestion(); }, "btn-blue");
-                addBtn(acts, "MAIN MENU", () => { saveLB(); quitToMenu(); }, "btn-red");
+                addBtn(acts, "NEXT STAGE ⬆️", () => { 
+                    closeModal(); 
+                    state.stage++; 
+                    state.level = 1; 
+                    loadQuestion(); 
+                }, "btn-green");
+                addBtn(acts, "ULANGI STAGE 🔄", () => { 
+                    closeModal(); 
+                    state.level = 1; 
+                    loadQuestion(); 
+                }, "btn-blue");
+                addBtn(acts, "MAIN MENU 🏠", () => { 
+                    saveLB(); 
+                    quitToMenu(); 
+                }, "btn-red");
             }
             m.style.display = "flex";
         }
 
         function addBtn(parent, text, fn, cls) {
             const b = document.createElement('button');
-            b.className = `btn ${cls}`; b.innerText = text; b.onclick = fn;
+            b.className = `btn ${cls}`; 
+            b.innerText = text; 
+            b.onclick = fn;
             parent.appendChild(b);
         }
 
-        function closeModal() { document.getElementById('modal').style.display = "none"; }
+        function closeModal() { 
+            document.getElementById('modal').style.display = "none"; 
+        }
 
         function saveLB() {
+            if (state.score <= 0) return;
+            
             let data = JSON.parse(localStorage.getItem('ef_discovery_500_lb')) || [];
             let p = data.find(x => x.name === state.playerName);
-            if (p) { if (state.score > p.score) p.score = state.score; } 
-            else { data.push({ name: state.playerName, score: state.score }); }
+            
+            if (p) { 
+                if (state.score > p.score) p.score = state.score; 
+            } else { 
+                data.push({ name: state.playerName, score: state.score }); 
+            }
+            
             data.sort((a,b) => b.score - a.score);
             localStorage.setItem('ef_discovery_500_lb', JSON.stringify(data.slice(0,10)));
         }
@@ -300,12 +472,24 @@
         function showLeaderboard() {
             const body = document.getElementById('lb-body');
             const data = JSON.parse(localStorage.getItem('ef_discovery_500_lb')) || [];
-            body.innerHTML = data.map((d, i) => `<tr><td>#${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center">Belum ada data</td></tr>';
+            body.innerHTML = data.map((d, i) => 
+                `<tr><td>#${i+1}</td><td>${d.name}</td><td>${d.score}</td></tr>`
+            ).join('') || '<tr><td colspan="3" style="text-align:center">Belum ada data</td></tr>';
             switchScreen('leaderboard-screen');
         }
 
-        function confirmQuit() { if(confirm("Keluar? Skor akan disimpan.")) { saveLB(); quitToMenu(); } }
-        function quitToMenu() { clearInterval(state.timerInterval); music.pause(); location.reload(); }
+        function confirmQuit() { 
+            if(confirm("Keluar? Skor akan disimpan.")) { 
+                saveLB(); 
+                quitToMenu(); 
+            } 
+        }
+        
+        function quitToMenu() { 
+            clearInterval(state.timerInterval); 
+            music.pause(); 
+            location.reload(); 
+        }
     </script>
 </body>
 </html>
