@@ -1,262 +1,260 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Game Station - PS5 Edition</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Game Station - PS5 Edition</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
 
-<style>
-:root {
-  --ps-light-blue: #00b4ff;
-  --text-main: #ffffff;
-  --glass: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --radius: 12px;
-}
+    <style>
+        :root {
+            --ps-light-blue: #00b4ff;
+            --text-main: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --radius: 12px;
+        }
 
-* { 
-  box-sizing: border-box; 
-  -webkit-tap-highlight-color: transparent;
-}
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
 
-body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: radial-gradient(circle at 20% 30%, rgba(0, 67, 156, 0.4), transparent),
-              linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), 
-              url('https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=2070&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: var(--text-main);
-  min-height: 100vh;
-  overflow-y: auto;
-}
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: radial-gradient(circle at 20% 30%, rgba(0, 67, 156, 0.4), transparent),
+                        linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), 
+                        url('https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-y: auto; /* Memastikan bisa di-scroll */
+        }
 
-.app {
-  padding: 40px 5%;
-  max-width: 1300px;
-  margin: 0 auto;
-}
+        .app {
+            padding: 40px 5%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 50px;
-  animation: fadeInDown 0.8s ease;
-}
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
 
-.topbar span {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  text-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
+        .topbar span {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
 
-.topbar button {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  color: white;
-  padding: 10px 24px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+        .topbar button {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-.topbar button:hover {
-  background: white;
-  color: black;
-  box-shadow: 0 0 15px white;
-}
+        .topbar button:hover {
+            background: white;
+            color: black;
+            box-shadow: 0 0 15px white;
+        }
 
-.game-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 30px;
-  padding: 20px 0;
-}
+        .game-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 30px;
+            padding: 20px 0 100px 0; /* Tambah padding bawah agar tidak terpotong */
+        }
 
-@media (min-width: 992px) {
-  .game-row {
-    grid-template-columns: repeat(4, 1fr); 
-  }
-}
+        @media (min-width: 992px) {
+            .game-row {
+                grid-template-columns: repeat(4, 1fr); 
+            }
+        }
 
-.game-tile {
-  width: 100%;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  z-index: 1;
-}
+        .game-tile {
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            z-index: 1;
+        }
 
-.game-tile:hover {
-  transform: scale(1.1);
-  z-index: 10; 
-}
+        .game-tile:hover {
+            transform: scale(1.1);
+            z-index: 10; 
+        }
 
-.game-cover {
-  position: relative;
-  aspect-ratio: 16/9; 
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 2px solid transparent;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-  background: #1a1a1a;
-  transition: all 0.3s ease;
-}
+        .game-cover {
+            position: relative;
+            aspect-ratio: 16/9; 
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 2px solid transparent;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background: #1a1a1a;
+            transition: all 0.3s ease;
+        }
 
-.game-tile:hover .game-cover {
-  border: 3px solid white;
-  box-shadow: 0 0 30px var(--ps-light-blue);
-}
+        .game-tile:hover .game-cover {
+            border: 3px solid white;
+            box-shadow: 0 0 30px var(--ps-light-blue);
+        }
 
-.cover-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  transition: transform 0.6s ease;
-  opacity: 0.8;
-}
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            transition: transform 0.6s ease;
+            opacity: 0.8;
+        }
 
-.game-tile:hover .cover-img {
-  transform: scale(1.1);
-  opacity: 1;
-}
+        .game-tile:hover .cover-img {
+            transform: scale(1.1);
+            opacity: 1;
+        }
 
-.overlay-text {
-  position: relative;
-  z-index: 2;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.5rem;
-  text-shadow: 2px 2px 15px rgba(0,0,0,0.9);
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-}
+        .overlay-text {
+            position: relative;
+            z-index: 2;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 15px rgba(0,0,0,0.9);
+            display: flex;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+        }
 
-.game-title {
-  margin-top: 15px;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: left;
-  opacity: 0.6;
-  letter-spacing: 1px;
-  transition: opacity 0.3s ease;
-}
+        .game-title {
+            margin-top: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: left;
+            opacity: 0.6;
+            letter-spacing: 1px;
+            transition: opacity 0.3s ease;
+        }
 
-.game-tile:hover .game-title {
-  opacity: 1;
-  color: var(--ps-light-blue);
-}
+        .game-tile:hover .game-title {
+            opacity: 1;
+            color: var(--ps-light-blue);
+        }
 
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <div class="topbar">
-    <button onclick="goHome()">Home</button>
-    <span>Game Station</span>
-    <button onclick="goBack()">Back</button>
-  </div>
-
-  <div class="game-row">
-
-    <div class="game-tile" onclick="launchGame('https://www.crazygames.com')">
-      <div class="game-cover">
-        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" class="cover-img">
-        <div class="overlay-text">🤖</div>
-      </div>
-      <div class="game-title">CRAZYGAMES</div>
+    <div class="topbar">
+        <button onclick="goHome()">Home</button>
+        <span>Game Station</span>
+        <button onclick="goBack()">Back</button>
     </div>
 
-    <div class="game-tile" onclick="launchGame('https://poki.com/id')">
-      <div class="game-cover">
-        <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=500" class="cover-img">
-        <div class="overlay-text">🇮🇩</div>
-      </div>
-      <div class="game-title">POKI</div>
-    </div>
+    <div class="game-row">
 
-    <div class="game-tile" onclick="launchGame('https://classicgamezone.com/gba-games')">
-      <div class="game-cover" style="background: #2575fc;">
-        <img src="https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?q=80&w=500" class="cover-img">
-        <div class="overlay-text">GBA</div>
-      </div>
-      <div class="game-title">GAME BOY ADVANCE</div>
-    </div>
+        <div class="game-tile" onclick="launchGame('https://www.crazygames.com')">
+            <div class="game-cover">
+                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=500" class="cover-img">
+                <div class="overlay-text">🤖</div>
+            </div>
+            <div class="game-title">CRAZYGAMES</div>
+        </div>
 
-    <div class="game-tile" onclick="launchGame('https://classicgamezone.com/nds-games')">
-      <div class="game-cover" style="background: #333;">
-        <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?q=80&w=500" class="cover-img">
-        <div class="overlay-text">NDS</div>
-      </div>
-      <div class="game-title">NINTENDO DS</div>
-    </div>
+        <div class="game-tile" onclick="launchGame('https://poki.com/id')">
+            <div class="game-cover">
+                <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=500" class="cover-img">
+                <div class="overlay-text">🇮🇩</div>
+            </div>
+            <div class="game-title">POKI</div>
+        </div>
 
-    <div class="game-tile" onclick="launchGame('https://classicgamezone.com/ps-games')">
-      <div class="game-cover" style="background: #003087;">
-        <img src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=500" class="cover-img">
-        <div class="overlay-text">PS1</div>
-      </div>
-      <div class="game-title">PLAYSTATION 1</div>
-    </div>
+        <div class="game-tile" onclick="launchGame('https://classicgamezone.com/gba-games')">
+            <div class="game-cover" style="background: #2575fc;">
+                <img src="https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?q=80&w=500" class="cover-img">
+                <div class="overlay-text">GBA</div>
+            </div>
+            <div class="game-title">GAME BOY ADVANCE</div>
+        </div>
 
-    <div class="game-tile" onclick="launchGame('https://playretrogames.online/category/ps2/')">
-      <div class="game-cover" style="background: #001f54;">
-        <img src="https://images.unsplash.com/photo-1592155931584-901ac15763e3?q=80&w=500" class="cover-img">
-        <div class="overlay-text">PS2</div>
-      </div>
-      <div class="game-title">PLAYSTATION 2</div>
-    </div>
+        <div class="game-tile" onclick="launchGame('https://classicgamezone.com/nds-games')">
+            <div class="game-cover" style="background: #333;">
+                <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?q=80&w=500" class="cover-img">
+                <div class="overlay-text">NDS</div>
+            </div>
+            <div class="game-title">NINTENDO DS</div>
+        </div>
 
-    <div class="game-tile" onclick="launchGame('https://minecraftforfreex.com/eaglercraft/')">
-  <div class="game-cover" style="background: #3c8527;">
-    <img src="https://images.unsplash.com/photo-1607988593361-ec6b9b775490?q=80&w=500&auto=format&fit=crop" class="cover-img">
-    <div class="overlay-text">⛏️</div>
-  </div>
-  <div class="game-title">MINECRAFT</div>
-</div>
+        <div class="game-tile" onclick="launchGame('https://classicgamezone.com/ps-games')">
+            <div class="game-cover" style="background: #003087;">
+                <img src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=500" class="cover-img">
+                <div class="overlay-text">PS1</div>
+            </div>
+            <div class="game-title">PLAYSTATION 1</div>
+        </div>
 
-<div class="game-tile" onclick="launchGame('https://www.mangabats.com/')">
-  <div class="game-cover" style="background: #e74c3c;">
-    <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=500&auto=format&fit=crop" class="cover-img">
-    <div class="overlay-text">📖</div>
-  </div>
-  <div class="game-title">BACA KOMIK</div>
-</div>
+        <div class="game-tile" onclick="launchGame('https://playretrogames.online/category/ps2/')">
+            <div class="game-cover" style="background: #001f54;">
+                <img src="https://images.unsplash.com/photo-1592155931584-901ac15763e3?q=80&w=500" class="cover-img">
+                <div class="overlay-text">PS2</div>
+            </div>
+            <div class="game-title">PLAYSTATION 2</div>
+        </div>
 
-  </div>
+        <div class="game-tile" onclick="launchGame('https://minecraftforfreex.com/eaglercraft/')">
+            <div class="game-cover" style="background: #3c8527;">
+                <img src="https://images.unsplash.com/photo-1607988593361-ec6b9b775490?q=80&w=500" class="cover-img">
+                <div class="overlay-text">⛏️</div>
+            </div>
+            <div class="game-title">MINECRAFT</div>
+        </div>
 
-</div>
+        <div class="game-tile" onclick="launchGame('https://www.mangabats.com/')">
+            <div class="game-cover" style="background: #e74c3c;">
+                <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?q=80&w=500" class="cover-img">
+                <div class="overlay-text">📖</div>
+            </div>
+            <div class="game-title">BACA KOMIK</div>
+        </div>
+
+    </div> </div>
 
 <script>
-function launchGame(url) {
-  window.open(url, '_blank');
-}
-function goHome() {
-  window.location.href = 'index.html';
-}
-function goBack() {
-  window.history.back();
-}
+    function launchGame(url) {
+        window.open(url, '_blank');
+    }
+    function goHome() {
+        window.location.href = 'index.html';
+    }
+    function goBack() {
+        window.history.back();
+    }
 </script>
 
 </body>
