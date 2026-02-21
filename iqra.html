@@ -111,6 +111,34 @@
             border-color: var(--primary-green);
         }
 
+        /* Level Grid Styles */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        .level-card {
+            background: white;
+            border: 2px solid var(--primary-green);
+            padding: 1.2rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-green);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .level-card:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(26, 92, 76, 0.2);
+        }
+
         .btn {
             width: 100%; padding: 1rem; border: none; border-radius: var(--radius-md);
             font-size: 1.1rem; font-weight: 600; cursor: pointer;
@@ -195,12 +223,28 @@
                 <div class="input-group">
                     <input type="text" id="player-name" class="name-input" placeholder="Masukkan namamu di sini..." autocomplete="off">
                 </div>
-                <button class="btn btn-primary" onclick="startGame()">Mulai Bermain</button>
+                <button class="btn btn-primary" onclick="goToLevelSelect()">Mulai Bermain</button>
                 <button class="btn btn-secondary" onclick="window.location.href='index.html'">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     Kembali ke Home
                 </button>
             </div>
+        </div>
+
+        <div id="level-select-screen" class="screen">
+            <div class="menu-header">
+                <h2 class="game-title" style="font-size: 2rem;">Pilih Iqro</h2>
+                <p class="game-subtitle" id="welcome-msg">Siap bermain?</p>
+            </div>
+            <div class="level-grid">
+                <div class="level-card" onclick="startLevel(1)">Iqro 1</div>
+                <div class="level-card" onclick="startLevel(2)">Iqro 2</div>
+                <div class="level-card" onclick="startLevel(3)">Iqro 3</div>
+                <div class="level-card" onclick="startLevel(4)">Iqro 4</div>
+                <div class="level-card" onclick="startLevel(5)">Iqro 5</div>
+                <div class="level-card" onclick="startLevel(6)">Iqro 6</div>
+            </div>
+            <button class="btn btn-secondary" style="width: 90%; margin-top: 1rem;" onclick="switchScreen('menu')">Kembali</button>
         </div>
 
         <div id="game-screen" class="screen">
@@ -223,17 +267,17 @@
             <h2 class="level-complete-text">Level Selesai!</h2>
             <p id="levelup-msg" style="margin-bottom: 2rem; color: #7f8c8d;"></p>
             <div style="width: 100%;">
-                <button class="btn btn-primary" onclick="nextLevel()">Level Berikutnya</button>
-                <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
+                <button class="btn btn-primary" id="btn-next-level" onclick="nextLevel()">Level Berikutnya</button>
+                <button class="btn btn-secondary" onclick="switchScreen('level-select-screen')">Pilih Level</button>
             </div>
         </div>
 
         <div id="finish-screen" class="screen">
             <div class="game-icon" style="margin-bottom: 2rem;"><span>🏆</span></div>
             <h2 class="game-title" style="font-size: 2rem;">Selamat!</h2>
-            <p class="game-subtitle" id="finish-msg" style="margin-bottom: 2rem;">Kamu telah menyelesaikan semua level Iqro</p>
+            <p class="game-subtitle" id="finish-msg" style="margin-bottom: 2rem;">Kamu telah menyelesaikan level Iqro</p>
             <div style="width: 100%;">
-                <button class="btn btn-primary" onclick="resetGame()">Main Lagi</button>
+                <button class="btn btn-primary" onclick="switchScreen('level-select-screen')">Pilih Level Lain</button>
                 <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
             </div>
         </div>
@@ -244,7 +288,8 @@
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="togglePause(false)">Lanjutkan</button>
                     <button class="btn btn-secondary" onclick="restartLevel()">Ulangi Level</button>
-                    <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
+                    <button class="btn btn-secondary" onclick="switchScreen('level-select-screen'); togglePause(false);">Pilih Level</button>
+                    <button class="btn btn-secondary" style="background: #e74c3c; color: white;" onclick="window.location.href='index.html'">Keluar Game</button>
                 </div>
             </div>
         </div>
@@ -252,60 +297,98 @@
 
     <script>
         /* ========================================
-           GAME DATA (REVISI: Sesuai Buku Iqro 1-6)
+           GAME DATA (BANK SOAL DIPERLUAS)
+           Berisi puluhan soal yang akan diacak setiap kali main
            ======================================== */
         const GAME_DATA = {
             1: { 
                 name: "Iqro 1", 
-                questions: [ 
+                questionBank: [ 
                     { q: "اَ", correct: "A", options: ["A", "Ba", "Ta", "Ja"] }, 
                     { q: "بَ", correct: "Ba", options: ["Ta", "Ba", "Sa", "A"] }, 
                     { q: "تَ", correct: "Ta", options: ["Ba", "Na", "Ta", "Ya"] }, 
-                    { q: "جَ", correct: "Ja", options: ["Ha", "Kha", "Ja", "Sa"] } 
+                    { q: "ثَ", correct: "Tsa", options: ["Sa", "Sya", "Tsa", "Ta"] }, 
+                    { q: "جَ", correct: "Ja", options: ["Ha", "Kha", "Ja", "Sa"] },
+                    { q: "حَ", correct: "Ha", options: ["Ja", "Kha", "Ha", "Sa"] },
+                    { q: "خَ", correct: "Kha", options: ["Kha", "Ha", "Gha", "Qa"] },
+                    { q: "دَ", correct: "Da", options: ["Dza", "Ra", "Da", "Za"] },
+                    { q: "رَ", correct: "Ra", options: ["Za", "Ra", "Da", "Dza"] },
+                    { q: "سَ", correct: "Sa", options: ["Sya", "Sa", "Sha", "Tsa"] }
                 ] 
             },
             2: { 
                 name: "Iqro 2", 
-                questions: [ 
+                questionBank: [ 
                     { q: "بَتَ", correct: "Bata", options: ["Bata", "Taba", "Naba", "Yada"] }, 
                     { q: "تَجَ", correct: "Taja", options: ["Jata", "Taja", "Baja", "Taha"] }, 
                     { q: "نَبَ", correct: "Naba", options: ["Bana", "Naya", "Naba", "Yaba"] }, 
-                    { q: "يَدَ", correct: "Yada", options: ["Yada", "Daya", "Naza", "Mada"] } 
+                    { q: "يَدَ", correct: "Yada", options: ["Yada", "Daya", "Naza", "Mada"] },
+                    { q: "بَانَا", correct: "Bana", options: ["Bana", "Bata", "Naba", "Yana"] },
+                    { q: "ذَاقَ", correct: "Dzaqa", options: ["Dzaqa", "Zada", "Raqa", "Dara"] },
+                    { q: "كَانَ", correct: "Kana", options: ["Kala", "Kana", "Kama", "Kara"] },
+                    { q: "مَالَا", correct: "Mala", options: ["Mala", "Nama", "Lama", "Mada"] },
+                    { q: "قَالَا", correct: "Qala", options: ["Qala", "Qama", "Kala", "Faza"] },
+                    { q: "زَادَ", correct: "Zada", options: ["Raza", "Daza", "Zada", "Rada"] }
                 ] 
             },
             3: { 
                 name: "Iqro 3", 
-                questions: [ 
+                questionBank: [ 
                     { q: "بِ", correct: "Bi", options: ["Ba", "Bi", "Bu", "Ti"] }, 
                     { q: "بُ", correct: "Bu", options: ["Bu", "Tu", "Nu", "Yu"] }, 
                     { q: "كُتِبَ", correct: "Kutiba", options: ["Kataba", "Kutiba", "Katibu", "Kutuba"] }, 
-                    { q: "قُرِئَ", correct: "Quri'a", options: ["Qara'a", "Quri'a", "Qiru'a", "Qari'a"] } 
+                    { q: "قُرِئَ", correct: "Quri'a", options: ["Qara'a", "Quri'a", "Qiru'a", "Qari'a"] },
+                    { q: "رُسُلُ", correct: "Rusulu", options: ["Rasala", "Risili", "Rusulu", "Rusila"] },
+                    { q: "سُئِلَ", correct: "Su'ila", options: ["Sa'ala", "Su'ila", "Si'ula", "Sa'ila"] },
+                    { q: "جُعِلَ", correct: "Ju'ila", options: ["Ja'ala", "Ju'ula", "Ji'ila", "Ju'ila"] },
+                    { q: "وُلِدَ", correct: "Wulida", options: ["Walada", "Wulida", "Wilida", "Wuluda"] },
+                    { q: "فُعِلَ", correct: "Fu'ila", options: ["Fa'ala", "Fu'ila", "Fi'ila", "Fu'ula"] },
+                    { q: "خُلِقَ", correct: "Khuliqa", options: ["Khalaqa", "Khuliqa", "Khiliqa", "Khuluqa"] }
                 ] 
             },
             4: { 
                 name: "Iqro 4", 
-                questions: [ 
+                questionBank: [ 
                     { q: "بَابًا", correct: "Baban", options: ["Baban", "Babin", "Babun", "Baba"] }, 
                     { q: "يَوْمٍ", correct: "Yaumin", options: ["Yauman", "Yaumin", "Yaumun", "Yamin"] }, 
                     { q: "مَسْجِدٌ", correct: "Masjidun", options: ["Masjidun", "Masjidan", "Masjidin", "Masjadun"] }, 
-                    { q: "أَنْعَمْتَ", correct: "An'amta", options: ["An'amta", "In'amta", "Un'amta", "An'imta"] } 
+                    { q: "أَنْعَمْتَ", correct: "An'amta", options: ["An'amta", "In'amta", "Un'amta", "An'imta"] },
+                    { q: "حَمْدًا", correct: "Hamdan", options: ["Hamdan", "Hamdin", "Hamdun", "Hamidun"] },
+                    { q: "بَيْتٍ", correct: "Baitin", options: ["Baitan", "Baitin", "Baitun", "Bayyit"] },
+                    { q: "رَسُولٌ", correct: "Rasulun", options: ["Rasulan", "Rasulin", "Rasulun", "Rusulun"] },
+                    { q: "شَيْءٍ", correct: "Syai'in", options: ["Syai'an", "Syai'in", "Syai'un", "Syai'a"] },
+                    { q: "كُتُبٌ", correct: "Kutubun", options: ["Kitabun", "Kutubun", "Kutubin", "Kutuban"] },
+                    { q: "خَيْرًا", correct: "Khairan", options: ["Khairin", "Khairan", "Khairun", "Khaira"] }
                 ] 
             },
             5: { 
                 name: "Iqro 5", 
-                questions: [ 
+                questionBank: [ 
                     { q: "إِنَّ", correct: "Inna", options: ["Inna", "Anna", "Unna", "Ima"] }, 
                     { q: "ثُمَّ", correct: "Tsumma", options: ["Tsumma", "Tsamma", "Tsimma", "Suma"] }, 
                     { q: "رَبِّكَ", correct: "Rabbika", options: ["Rabbika", "Rabbaka", "Rabbuka", "Ribbika"] }, 
-                    { q: "حَقٌّ", correct: "Haqqun", options: ["Haqqun", "Haqqan", "Haqqin", "Haqqu"] } 
+                    { q: "حَقٌّ", correct: "Haqqun", options: ["Haqqun", "Haqqan", "Haqqin", "Haqqu"] },
+                    { q: "صَفًّا", correct: "Saffan", options: ["Saffan", "Saffin", "Saffun", "Safa"] },
+                    { q: "كُلٌّ", correct: "Kullun", options: ["Kallan", "Killin", "Kullun", "Kula"] },
+                    { q: "ظَنَّ", correct: "Zhanna", options: ["Zhinna", "Zhunna", "Zhanna", "Zhana"] },
+                    { q: "جَنَّةٌ", correct: "Jannatun", options: ["Jannatin", "Jannatan", "Jannatun", "Janata"] },
+                    { q: "سِرًّا", correct: "Sirran", options: ["Sarran", "Surran", "Sirran", "Sira"] },
+                    { q: "أُمَّةٌ", correct: "Ummatun", options: ["Immatan", "Ummatun", "Ammatin", "Umata"] }
                 ] 
             },
             6: { 
                 name: "Iqro 6", 
-                questions: [ 
+                questionBank: [ 
                     { q: "وَالضُّحَى", correct: "Wadh-dhuha", options: ["Wadh-dhuha", "Wad-duha", "Wadh-dhiha", "Wal-dhuha"] }, 
                     { q: "أَلَمْ نَشْرَحْ", correct: "Alam nasyrah", options: ["Alam nasyrah", "Alum nasyrah", "Alam nusyrah", "Ilam nasyrah"] }, 
-                    { q: "اَلْحَمْدُ لِلَّهِ", correct: "Alhamdulillahi", options: ["Alhamdulillahi", "Alhamdulillahu", "Alhamdulillah", "Alhamdilillahi"] } 
+                    { q: "اَلْحَمْدُ لِلَّهِ", correct: "Alhamdulillahi", options: ["Alhamdulillahi", "Alhamdulillahu", "Alhamdulillah", "Alhamdilillahi"] },
+                    { q: "مِن شَرِّ", correct: "Min syarri", options: ["Min syarra", "Min syarri", "Man syarri", "Mun syarru"] },
+                    { q: "فِى صُدُورِ", correct: "Fi shuduri", options: ["Fa shudura", "Fu shuduru", "Fi shuduri", "Fi sadari"] },
+                    { q: "إِذَا جَاءَ", correct: "Idza ja'a", options: ["Idza ji'a", "Idza ju'a", "Idza ja'a", "Adza ja'a"] },
+                    { q: "مَالِكِ يَوْمِ", correct: "Maliki yaumi", options: ["Maliki yauma", "Malika yaumi", "Maliku yaumi", "Maliki yaumin"] },
+                    { q: "قُلْ هُوَ اللَّهُ", correct: "Qul huwallahu", options: ["Qul huwallaha", "Qal huwallahu", "Qul huwallahi", "Qul huwallahu"] },
+                    { q: "وَلَا الضَّالِّينَ", correct: "Waladh-dhallin", options: ["Waladh-dhallun", "Waladh-dhallin", "Walad-dalin", "Wala dhallin"] },
+                    { q: "غَاسِقٍ إِذَا", correct: "Ghasiqin idza", options: ["Ghasiqan idza", "Ghasiqin idza", "Ghasiqon adza", "Ghasiq adza"] }
                 ] 
             }
         };
@@ -313,12 +396,36 @@
         /* ========================================
            STATE & DOM
            ======================================== */
-        let state = { playerName: "", currentLevel: 1, currentQuestionIndex: 0, score: 0, isPaused: false, currentQuestionData: null };
-        const screens = { menu: document.getElementById('menu-screen'), game: document.getElementById('game-screen'), levelup: document.getElementById('levelup-screen'), finish: document.getElementById('finish-screen') };
-        const ui = { levelDisplay: document.getElementById('level-display'), scoreDisplay: document.getElementById('score-display'), questionText: document.getElementById('question-text'), optionsContainer: document.getElementById('options-container'), pauseModal: document.getElementById('pause-modal'), levelupMsg: document.getElementById('levelup-msg'), finishMsg: document.getElementById('finish-msg') };
+        let state = { 
+            playerName: "", 
+            currentLevel: 1, 
+            currentQuestionIndex: 0, 
+            score: 0, 
+            isPaused: false, 
+            currentLevelQuestions: [],
+            currentQuestionData: null 
+        };
+        const screens = { 
+            menu: document.getElementById('menu-screen'), 
+            levelSelect: document.getElementById('level-select-screen'),
+            game: document.getElementById('game-screen'), 
+            levelup: document.getElementById('levelup-screen'), 
+            finish: document.getElementById('finish-screen') 
+        };
+        const ui = { 
+            levelDisplay: document.getElementById('level-display'), 
+            scoreDisplay: document.getElementById('score-display'), 
+            questionText: document.getElementById('question-text'), 
+            optionsContainer: document.getElementById('options-container'), 
+            pauseModal: document.getElementById('pause-modal'), 
+            levelupMsg: document.getElementById('levelup-msg'), 
+            finishMsg: document.getElementById('finish-msg'),
+            welcomeMsg: document.getElementById('welcome-msg'),
+            btnNextLevel: document.getElementById('btn-next-level')
+        };
 
         /* ========================================
-           AUDIO HANDLING (REVISI: Google TTS API)
+           AUDIO HANDLING
            ======================================== */
         let audioCtx = null;
         
@@ -330,13 +437,13 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        // Suara Pelafalan Bahasa Arab (Pasti bunyi)
+        // Suara Pelafalan Bahasa Arab
         function playArabicAudio(text) {
             return new Promise((resolve) => {
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(text)}`;
                 const audio = new Audio(url);
                 audio.onended = () => resolve();
-                audio.onerror = () => resolve(); // Tetap lanjut walau gagal load
+                audio.onerror = () => resolve(); 
                 audio.play().catch(e => resolve());
             });
         }
@@ -357,17 +464,19 @@
         /* ========================================
            CORE GAME LOGIC
            ======================================== */
-        function startGame() {
-            // Ambil nama pemain
+        function goToLevelSelect() {
             const nameInput = document.getElementById('player-name').value.trim();
             state.playerName = nameInput ? nameInput : "Sobat";
+            ui.welcomeMsg.textContent = `Pilih level untuk mulai belajar, ${state.playerName}!`;
+            
+            initAudio(); // Aktifkan audio engine saat user klik
+            switchScreen('levelSelect');
+        }
 
-            initAudio(); 
-            state.currentLevel = 1;
-            state.currentQuestionIndex = 0;
+        function startLevel(levelNum) {
+            state.currentLevel = levelNum;
             state.score = 0;
             state.isPaused = false;
-            
             loadLevel(); 
             switchScreen('game');
         }
@@ -376,13 +485,22 @@
             const levelData = GAME_DATA[state.currentLevel];
             ui.levelDisplay.textContent = levelData.name;
             ui.scoreDisplay.textContent = `Skor: ${state.score}`;
+            
+            // LOGIKA PENGACAKAN
+            const shuffledBank = [...levelData.questionBank].sort(() => Math.random() - 0.5);
+            state.currentLevelQuestions = shuffledBank.slice(0, 5); // Tampilkan 5 soal acak
+            state.currentQuestionIndex = 0;
+
             loadQuestion();
         }
 
         function loadQuestion() {
-            const levelData = GAME_DATA[state.currentLevel];
-            if (state.currentQuestionIndex >= levelData.questions.length) { handleLevelComplete(); return; }
-            const qData = levelData.questions[state.currentQuestionIndex];
+            if (state.currentQuestionIndex >= state.currentLevelQuestions.length) { 
+                handleLevelComplete(); 
+                return; 
+            }
+            
+            const qData = state.currentLevelQuestions[state.currentQuestionIndex];
             state.currentQuestionData = qData;
             ui.questionText.textContent = qData.q;
             ui.optionsContainer.innerHTML = '';
@@ -404,7 +522,6 @@
             buttons.forEach(btn => btn.disabled = true);
 
             if (selected === correctAnswer) {
-                // JIKA BENAR: Suara Arab -> Soal Berikutnya
                 btnElement.classList.add('correct');
                 state.score += 10;
                 ui.scoreDisplay.textContent = `Skor: ${state.score}`;
@@ -414,7 +531,6 @@
                 state.currentQuestionIndex++;
                 loadQuestion();
             } else {
-                // JIKA SALAH: Suara Buzz -> Suara Arab -> Coba Lagi
                 btnElement.classList.add('wrong');
                 playWrongSound();
                 
@@ -430,24 +546,38 @@
         function handleLevelComplete() {
             if (state.currentLevel < 6) {
                 ui.levelupMsg.textContent = `Mantap ${state.playerName}! Kamu sudah menyelesaikan ${GAME_DATA[state.currentLevel].name}`;
+                ui.btnNextLevel.style.display = 'block'; // Tampilkan tombol next level
                 switchScreen('levelup');
             } else { 
-                ui.finishMsg.textContent = `Luar biasa ${state.playerName}! Kamu telah menyelesaikan semua level Iqro`;
+                ui.finishMsg.textContent = `Luar biasa ${state.playerName}! Kamu telah menyelesaikan Iqro 6`;
                 switchScreen('finish'); 
             }
         }
 
-        function nextLevel() { state.currentLevel++; state.currentQuestionIndex = 0; loadLevel(); switchScreen('game'); }
-        function restartLevel() { state.currentQuestionIndex = 0; loadLevel(); togglePause(false); }
-        function resetGame() { 
-            state.currentLevel = 1;
-            state.currentQuestionIndex = 0;
-            state.score = 0;
-            loadLevel();
+        function nextLevel() { 
+            state.currentLevel++; 
+            loadLevel(); 
             switchScreen('game'); 
         }
-        function togglePause(show) { state.isPaused = show; ui.pauseModal.classList.toggle('active', show); }
-        function switchScreen(screenName) { Object.values(screens).forEach(el => el.classList.remove('active')); screens[screenName].classList.add('active'); }
+
+        function restartLevel() { 
+            loadLevel(); 
+            togglePause(false); 
+        }
+
+        function togglePause(show) { 
+            state.isPaused = show; 
+            if(show) {
+                ui.pauseModal.classList.add('active');
+            } else {
+                ui.pauseModal.classList.remove('active');
+            }
+        }
+
+        function switchScreen(screenName) { 
+            Object.values(screens).forEach(el => el.classList.remove('active')); 
+            screens[screenName].classList.add('active'); 
+        }
     </script>
 </body>
 </html>
