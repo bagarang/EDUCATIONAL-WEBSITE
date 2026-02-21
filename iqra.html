@@ -77,7 +77,7 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        .menu-header { text-align: center; margin-bottom: 3rem; }
+        .menu-header { text-align: center; margin-bottom: 2rem; }
         .game-icon {
             width: 120px; height: 120px;
             background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
@@ -90,6 +90,26 @@
         .game-icon span { font-size: 3rem; color: white; font-weight: bold; }
         .game-title { font-size: 2.5rem; color: var(--primary-green); font-weight: 800; margin-bottom: 0.5rem; }
         .game-subtitle { color: #7f8c8d; font-size: 1.1rem; }
+
+        /* Input Form Styles */
+        .input-group {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        .name-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+            color: var(--text-dark);
+        }
+        .name-input:focus {
+            border-color: var(--primary-green);
+        }
 
         .btn {
             width: 100%; padding: 1rem; border: none; border-radius: var(--radius-md);
@@ -172,7 +192,14 @@
                 <p class="game-subtitle">Belajar Huruf Hijaiyah</p>
             </div>
             <div style="width: 100%; padding: 0 1rem;">
+                <div class="input-group">
+                    <input type="text" id="player-name" class="name-input" placeholder="Masukkan namamu di sini..." autocomplete="off">
+                </div>
                 <button class="btn btn-primary" onclick="startGame()">Mulai Bermain</button>
+                <button class="btn btn-secondary" onclick="window.location.href='index.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Kembali ke Home
+                </button>
             </div>
         </div>
 
@@ -197,17 +224,17 @@
             <p id="levelup-msg" style="margin-bottom: 2rem; color: #7f8c8d;"></p>
             <div style="width: 100%;">
                 <button class="btn btn-primary" onclick="nextLevel()">Level Berikutnya</button>
-                <button class="btn btn-secondary" onclick="goToMenu()">Menu Utama</button>
+                <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
             </div>
         </div>
 
         <div id="finish-screen" class="screen">
             <div class="game-icon" style="margin-bottom: 2rem;"><span>🏆</span></div>
             <h2 class="game-title" style="font-size: 2rem;">Selamat!</h2>
-            <p class="game-subtitle" style="margin-bottom: 2rem;">Kamu telah menyelesaikan semua level Iqro</p>
+            <p class="game-subtitle" id="finish-msg" style="margin-bottom: 2rem;">Kamu telah menyelesaikan semua level Iqro</p>
             <div style="width: 100%;">
                 <button class="btn btn-primary" onclick="resetGame()">Main Lagi</button>
-                <button class="btn btn-secondary" onclick="goToMenu()">Menu Utama</button>
+                <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
             </div>
         </div>
 
@@ -217,7 +244,7 @@
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="togglePause(false)">Lanjutkan</button>
                     <button class="btn btn-secondary" onclick="restartLevel()">Ulangi Level</button>
-                    <button class="btn btn-secondary" onclick="goToMenu()">Menu Utama</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='index.html'">Menu Utama</button>
                 </div>
             </div>
         </div>
@@ -286,9 +313,9 @@
         /* ========================================
            STATE & DOM
            ======================================== */
-        let state = { currentLevel: 1, currentQuestionIndex: 0, score: 0, isPaused: false, currentQuestionData: null };
+        let state = { playerName: "", currentLevel: 1, currentQuestionIndex: 0, score: 0, isPaused: false, currentQuestionData: null };
         const screens = { menu: document.getElementById('menu-screen'), game: document.getElementById('game-screen'), levelup: document.getElementById('levelup-screen'), finish: document.getElementById('finish-screen') };
-        const ui = { levelDisplay: document.getElementById('level-display'), scoreDisplay: document.getElementById('score-display'), questionText: document.getElementById('question-text'), optionsContainer: document.getElementById('options-container'), pauseModal: document.getElementById('pause-modal'), levelupMsg: document.getElementById('levelup-msg') };
+        const ui = { levelDisplay: document.getElementById('level-display'), scoreDisplay: document.getElementById('score-display'), questionText: document.getElementById('question-text'), optionsContainer: document.getElementById('options-container'), pauseModal: document.getElementById('pause-modal'), levelupMsg: document.getElementById('levelup-msg'), finishMsg: document.getElementById('finish-msg') };
 
         /* ========================================
            AUDIO HANDLING (REVISI: Google TTS API)
@@ -331,9 +358,18 @@
            CORE GAME LOGIC
            ======================================== */
         function startGame() {
+            // Ambil nama pemain
+            const nameInput = document.getElementById('player-name').value.trim();
+            state.playerName = nameInput ? nameInput : "Sobat";
+
             initAudio(); 
-            state = { currentLevel: 1, currentQuestionIndex: 0, score: 0, isPaused: false };
-            loadLevel(); switchScreen('game');
+            state.currentLevel = 1;
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.isPaused = false;
+            
+            loadLevel(); 
+            switchScreen('game');
         }
 
         function loadLevel() {
@@ -393,15 +429,23 @@
 
         function handleLevelComplete() {
             if (state.currentLevel < 6) {
-                ui.levelupMsg.textContent = `Mantap! Kamu sudah menyelesaikan ${GAME_DATA[state.currentLevel].name}`;
+                ui.levelupMsg.textContent = `Mantap ${state.playerName}! Kamu sudah menyelesaikan ${GAME_DATA[state.currentLevel].name}`;
                 switchScreen('levelup');
-            } else { switchScreen('finish'); }
+            } else { 
+                ui.finishMsg.textContent = `Luar biasa ${state.playerName}! Kamu telah menyelesaikan semua level Iqro`;
+                switchScreen('finish'); 
+            }
         }
 
         function nextLevel() { state.currentLevel++; state.currentQuestionIndex = 0; loadLevel(); switchScreen('game'); }
         function restartLevel() { state.currentQuestionIndex = 0; loadLevel(); togglePause(false); }
-        function resetGame() { startGame(); }
-        function goToMenu() { switchScreen('menu'); togglePause(false); }
+        function resetGame() { 
+            state.currentLevel = 1;
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            loadLevel();
+            switchScreen('game'); 
+        }
         function togglePause(show) { state.isPaused = show; ui.pauseModal.classList.toggle('active', show); }
         function switchScreen(screenName) { Object.values(screens).forEach(el => el.classList.remove('active')); screens[screenName].classList.add('active'); }
     </script>
